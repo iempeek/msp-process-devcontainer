@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/chargebee/api/v2/coupons",
+    "queryParameters": {
+      "id[is]": {
+        "matches": ".+"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "list": [
+        {
+          "coupon": {
+            "id": "{{lookup request.query 'id[is]'}}",
+            "name": "WireMock coupon",
+            "discount_type": "percentage",
+            "discount_percentage": 10.0,
+            "duration_type": "forever",
+            "apply_on": "invoice_amount",
+            "status": "active",
+            "object": "coupon"
+          }
+        }
+      ],
+      "next_offset": null
+    }
+  }
+}

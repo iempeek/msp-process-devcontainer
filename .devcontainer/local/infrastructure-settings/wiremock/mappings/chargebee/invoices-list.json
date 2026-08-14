@@ -1,0 +1,38 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/chargebee/api/v2/invoices",
+    "queryParameters": {
+      "subscription_id[is]": {
+        "matches": ".+"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "list": [
+        {
+          "invoice": {
+            "id": "inv-local-dev-0001",
+            "customer_id": "cust-local-dev-0001",
+            "subscription_id": "{{lookup request.query 'subscription_id[is]'}}",
+            "status": "paid",
+            "price_type": "tax_exclusive",
+            "date": 1754000000,
+            "total": 37500,
+            "amount_paid": 37500,
+            "amount_due": 0,
+            "currency_code": "USD",
+            "deleted": false,
+            "object": "invoice"
+          }
+        }
+      ],
+      "next_offset": null
+    }
+  }
+}

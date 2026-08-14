@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/botapi/techBotMessages/sendAdaptiveCard"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "teamsActivityId": "wiremock-activity-{{randomValue length=12 type='NUMERIC'}}",
+      "conversationId": "{{#if (jsonPath request.body '$.ConversationId')}}{{jsonPath request.body '$.ConversationId'}}{{else}}19:wiremock-conversation@thread.tacv2{{/if}}"
+    }
+  }
+}

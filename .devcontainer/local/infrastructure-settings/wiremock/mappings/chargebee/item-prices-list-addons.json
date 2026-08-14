@@ -1,0 +1,33 @@
+{
+  "priority": 4,
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/chargebee/api/v2/item_prices",
+    "queryParameters": {
+      "item_type[is]": { "equalTo": "addon" }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "list": [
+        {
+          "item_price": {
+            "id": "Std_addOn_2500",
+            "name": "WireMock item price",
+            "item_type": "addon",
+            "status": "active",
+            "pricing_model": "per_unit",
+            "price": 2500,
+            "currency_code": "USD",
+            "period": 1,
+            "period_unit": "month",
+            "object": "item_price"
+          }
+        }
+      ],
+      "next_offset": null
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/2010-04-01/Accounts/[^/]+/AvailablePhoneNumbers/[^/]+/(Local|Mobile|TollFree)\\.json"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "first_page_uri": "{{{request.path}}}?Page=0&PageSize=50",
+      "end": 2,
+      "start": 0,
+      "previous_page_uri": null,
+      "next_page_uri": null,
+      "page": 0,
+      "page_size": 50,
+      "uri": "{{{request.url}}}",
+      "available_phone_numbers": [
+        {
+          "friendly_name": "(500) 555-0006",
+          "phone_number": "+15005550006",
+          "iso_country": "{{request.pathSegments.[4]}}",
+          "capabilities": { "voice": true, "sms": true, "mms": true, "fax": false },
+          "beta": false,
+          "lata": null,
+          "rate_center": null,
+          "region": null,
+          "postal_code": null
+        },
+        {
+          "friendly_name": "(500) 555-0007",
+          "phone_number": "+15005550007",
+          "iso_country": "{{request.pathSegments.[4]}}",
+          "capabilities": { "voice": true, "sms": true, "mms": false, "fax": false },
+          "beta": false,
+          "lata": null,
+          "rate_center": null,
+          "region": null,
+          "postal_code": null
+        },
+        {
+          "friendly_name": "(500) 555-0008",
+          "phone_number": "+15005550008",
+          "iso_country": "{{request.pathSegments.[4]}}",
+          "capabilities": { "voice": true, "sms": true, "mms": true, "fax": false },
+          "beta": false,
+          "lata": null,
+          "rate_center": null,
+          "region": null,
+          "postal_code": null
+        }
+      ]
+    }
+  }
+}

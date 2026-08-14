@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/chargebee/api/v2/price_variants",
+    "queryParameters": {
+      "id[is]": {
+        "matches": ".+"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "list": [
+        {
+          "price_variant": {
+            "id": "{{lookup request.query 'id[is]'}}",
+            "name": "WireMock price variant",
+            "status": "active",
+            "object": "price_variant"
+          }
+        }
+      ],
+      "next_offset": null
+    }
+  }
+}

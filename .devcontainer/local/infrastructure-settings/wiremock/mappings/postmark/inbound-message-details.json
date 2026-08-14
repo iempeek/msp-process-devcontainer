@@ -1,0 +1,33 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/messages/inbound/[^/]+/details"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "From": "sender@wiremock.local",
+      "FromName": "WireMock Sender",
+      "FromFull": { "Email": "sender@wiremock.local", "Name": "WireMock Sender", "MailboxHash": "" },
+      "To": "inbound@wiremock.local",
+      "ToFull": [{ "Email": "inbound@wiremock.local", "Name": "", "MailboxHash": "" }],
+      "Cc": "",
+      "CcFull": [],
+      "Bcc": "",
+      "BccFull": [],
+      "ReplyTo": "",
+      "Subject": "[wiremock] canned Postmark inbound message",
+      "MessageID": "{{request.pathSegments.[2]}}",
+      "OriginalRecipient": "inbound@wiremock.local",
+      "Date": "Wed, 05 Aug 2026 12:00:00 +0000",
+      "MailboxHash": "",
+      "TextBody": "This is a canned Postmark inbound message body served by the wiremock sidecar.",
+      "HtmlBody": "<p>This is a canned Postmark inbound message body served by the wiremock sidecar.</p>",
+      "Tag": "",
+      "StrippedTextReply": "",
+      "Headers": [],
+      "Attachments": []
+    }
+  }
+}

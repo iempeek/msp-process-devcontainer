@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "ANY",
+    "urlPathPattern": "/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Web/certificates/[^/]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "id": "/subscriptions/local-sub/resourceGroups/local-rg/providers/Microsoft.Web/certificates/{{request.pathSegments.[7]}}",
+      "name": "{{request.pathSegments.[7]}}",
+      "type": "Microsoft.Web/certificates",
+      "location": "Central US",
+      "properties": {
+        "thumbprint": "LOCALDEVTHUMBPRINT000000000000000000001",
+        "subjectName": "{{request.pathSegments.[7]}}",
+        "issuer": "wiremock local CA",
+        "keyVaultSecretStatus": "Succeeded"
+      }
+    }
+  }
+}

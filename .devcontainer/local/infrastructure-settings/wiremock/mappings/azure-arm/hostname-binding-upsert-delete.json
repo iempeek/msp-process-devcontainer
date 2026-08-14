@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "ANY",
+    "urlPathPattern": "/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Web/sites/[^/]+/hostNameBindings/[^/]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "id": "/subscriptions/local-sub/resourceGroups/local-rg/providers/Microsoft.Web/sites/{{request.pathSegments.[7]}}/hostNameBindings/{{request.pathSegments.[9]}}",
+      "name": "{{request.pathSegments.[9]}}",
+      "type": "Microsoft.Web/sites/hostNameBindings",
+      "location": "Central US",
+      "properties": {
+        "siteName": "{{request.pathSegments.[7]}}",
+        "domainId": null,
+        "hostNameType": "Verified",
+        "sslState": "SniEnabled",
+        "thumbprint": "LOCALDEVTHUMBPRINT000000000000000000001"
+      }
+    }
+  }
+}

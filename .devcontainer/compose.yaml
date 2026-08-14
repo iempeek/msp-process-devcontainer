@@ -1,0 +1,246 @@
+# .devcontainer/compose.yaml
+#
+# Infrastructure sidecars for the devcontainer.
+# IMPORTANT: this is NOT the devcontainer itself - these services are started
+# from INSIDE the devcontainer but run on the HOST docker daemon
+# (docker-outside-of-docker), as sibling containers.
+#
+# Networking model:
+#   All services join the shared external network "mspprocess-infra".
+#   The devcontainer attaches itself to the same network on startup
+#   (see .devcontainer/infra-up.sh), so services are reachable from inside
+#   the devcontainer BY SERVICE NAME, e.g. mssql:1433, redis:6379.
+#   Host `ports:` mappings are only for host-side tools (SSMS, Compass, ...) -
+#   remove any mapping that clashes with a service already on the host.
+#
+# Storage model:
+#   Sidecar data lives in bind mounts under the workspace's .adlc-artifacts/
+#   (gitignored). Under DooD the daemon resolves bind sources on the HOST,
+#   so paths are built from LOCAL_WORKSPACE_FOLDER (set in devcontainer.json
+#   from ${localWorkspaceFolder}). The `..` fallback keeps the file usable
+#   when compose is run from the HOST repo root too. (The sibling frontend
+#   checkout is mounted by devcontainer.json at /frontend, not by compose.)
+#   Exception: mssql uses a named Docker volume instead - see the note on that
+#   service for why.
+#
+# Ownership model:
+#   initialize.sh pre-creates every bind source/target USER-owned on the host
+#   (the daemon creates missing ones as root - never let it). Services with
+#   data dirs run AS THAT UID via `user:` (infra-up.sh exports SIDECAR_UID/GID)
+#   so data stays plain user-owned - no chmod, no root-owned files in the repo.
+#
+# Lifecycle:
+#   up:    docker compose -p mspprocess-infra -f .devcontainer/compose.yaml up -d
+#   down:  docker compose -p mspprocess-infra -f .devcontainer/compose.yaml down
+#   (the -p project name keeps it grouped and reusable across rebuilds)
+#
+# Passwords/keys below are DEV-ONLY throwaways for local sidecars - never
+# reuse real credentials here.
+
+name: mspprocess-infra
+
+networks:
+  mspprocess-infra:
+    name: mspprocess-infra
+    external: true   # created by infra-up.sh so the devcontainer can join it too
+
+volumes:
+  # NAMED volume, not a .adlc-artifacts/ bind mount like the other sidecars -
+  # see the note on the mssql service below for why.
+  mssql_data:
+
+services:
+
+  # --- SQL Server (EF Core contexts: AlertManager, Tech, OAuth, ScheduleAssist ...) ---
+  # Also the backing store required by the Service Bus emulator below.
+  #
+  # Uses a Docker-managed named volume instead of a .adlc-artifacts/ bind mount
+  # (unlike every other sidecar here). SQL Server's Linux PAL needs POSIX file
+  # locking/mmap semantics during its startup LSA init that Docker Desktop's
+  # Windows-drive bind-mount translation doesn't fully provide - confirmed by
+  # reproducing a "Failed to load LSA" crash loop even against a fresh,
+  # correctly-owned bind-mounted directory. A named volume lives natively in
+  # the Docker/WSL2 VM's own filesystem, avoiding that translation layer.
+  # Consequently this service also does NOT set `user: SIDECAR_UID` like the
+  # other sidecars: forcing that UID here bypasses the image's own
+  # root-to-mssql-user privilege-drop init and reproduces the same class of
+  # crash against a fresh volume, so mssql is left to run as the image's
+  # built-in default user.
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    networks: [mspprocess-infra]
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=MsppDev_password1
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'MsppDev_password1' -Q 'SELECT 1' -b"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    # From inside the devcontainer:
+    #   Server=mssql;Database=<db>;User Id=sa;Password=MsppDev_password1;TrustServerCertificate=True
+
+  # --- Redis (Microsoft.Extensions.Caching.StackExchangeRedis) ---
+  # Cache-only usage - no persistence volume on purpose.
+  redis:
+    image: redis:7-alpine
+    networks: [mspprocess-infra]
+    ports:
+      - "6379:6379"
+    # From inside the devcontainer: redis:6379
+
+  # --- MongoDB (MongoDB.Driver / CosmosDbContext via Cosmos Mongo API) ---
+  mongo:
+    image: mongo:7
+    user: "${SIDECAR_UID:-1000}:${SIDECAR_GID:-1000}"
+    networks: [mspprocess-infra]
+    ports:
+      - "27017:27017"
+    volumes:
+      - ${LOCAL_WORKSPACE_FOLDER:-..}/.adlc-artifacts/mongo_data:/data/db
+    # From inside the devcontainer: mongodb://mongo:27017
+
+  # --- Azurite (Azure Storage emulator: Blobs, Queues, Tables) ---
+  # Covers Azure.Storage.Blobs/Queues, WebJobs/Functions storage and the
+  # Cosmos Table API usage (Azurite v3 implements the Table endpoint).
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    user: "${SIDECAR_UID:-1000}:${SIDECAR_GID:-1000}"
+    networks: [mspprocess-infra]
+    ports:
+      - "10000:10000"   # blob
+      - "10001:10001"   # queue
+      - "10002:10002"   # table
+    volumes:
+      - ${LOCAL_WORKSPACE_FOLDER:-..}/.adlc-artifacts/azurite_data:/data
+    # From inside the devcontainer (well-known dev account, not a secret):
+    #   DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;
+    #   AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;
+    #   BlobEndpoint=http://azurite:10000/devstoreaccount1;
+    #   QueueEndpoint=http://azurite:10001/devstoreaccount1;
+    #   TableEndpoint=http://azurite:10002/devstoreaccount1;
+
+  # --- Azure Service Bus emulator (Azure.Messaging.ServiceBus, Functions SB triggers) ---
+  # Entities (queues/topics) cannot be created at runtime - they are declared
+  # up front in servicebus-config/Config.json (currently: the "notifications"
+  # queue consumed by MspProcess.Functions.ResultProcessor). After editing the
+  # config, recreate with: docker compose -p mspprocess-infra -f .devcontainer/compose.yaml up -d servicebus
+  servicebus:
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    networks: [mspprocess-infra]
+    ports:
+      - "5672:5672"
+    environment:
+      - ACCEPT_EULA=Y
+      - SQL_SERVER=mssql
+      - MSSQL_SA_PASSWORD=MsppDev_password1
+    volumes:
+      - ${LOCAL_WORKSPACE_FOLDER:-..}/.devcontainer/local/infrastructure-settings/servicebus-config/Config.json:/ServiceBus_Emulator/ConfigFiles/Config.json:ro
+    depends_on:
+      mssql:
+        condition: service_healthy
+    # From inside the devcontainer (fixed emulator SAS key, not a secret):
+    #   Endpoint=sb://servicebus;SharedAccessKeyName=RootManageSharedAccessKey;
+    #   SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;
+
+  # --- Mailpit (SMTP server + web UI, catches all outgoing local mail) ---
+  # EmailOptions:SmtpOptions in settings.Local.json points here instead of Postmark's relay.
+  mailpit:
+    image: axllent/mailpit:latest
+    networks: [mspprocess-infra]
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI - http://localhost:8025
+    # From inside the devcontainer: mailpit:1025 (no auth, no TLS)
+
+  # --- Soketi (Pusher-protocol-compatible websocket server) ---
+  # PusherSettings:*Pusher in settings.Local.json point HostName/Port here. One soketi app
+  # serves all four logical Pusher apps (Chat/LiveChat/ClientPortal/AuthApp) - channel names
+  # are already tenant/config-scoped so they don't collide.
+  soketi:
+    image: quay.io/soketi/soketi:1.6-16-alpine
+    networks: [mspprocess-infra]
+    ports:
+      - "6001:6001"
+    environment:
+      - SOKETI_DEFAULT_APP_ID=local-app
+      - SOKETI_DEFAULT_APP_KEY=local-key
+      - SOKETI_DEFAULT_APP_SECRET=local-secret
+    # From inside the devcontainer: soketi:6001 (ws and http, unencrypted)
+
+  # --- stripe-mock (Stripe API simulator, spec-generated responses) ---
+  stripe-mock:
+    image: stripe/stripe-mock:latest
+    networks: [mspprocess-infra]
+    ports:
+      - "12111:12111"
+    # From inside the devcontainer: http://stripe-mock:12111
+
+  # --- WireMock (HTTP stub server for vendors with no emulator: Twilio, Postmark) ---
+  # Stub mappings are checked in under .devcontainer/local/infrastructure-settings/wiremock/mappings/ (one file
+  # per endpoint; response templating enabled). Backend wiring:
+  #   Twilio   - Twilio:ApiBaseUrl in settings.Local.json makes
+  #              TwilioClientInitializer rewrite the SDK's hardcoded
+  #              *.twilio.com hosts to this container.
+  #   Postmark - Postmark:ApiUrl in settings.Local.json replaces the
+  #              production https://api.postmarkapp.com base.
+  # Unmatched vendor calls return a JSON 404 naming the missing mapping.
+  wiremock:
+    image: wiremock/wiremock:3x
+    networks: [mspprocess-infra]
+    ports:
+      - "8080:8080"   # admin UI/API: http://localhost:8080/__admin/
+      - "8443:8443"   # HTTPS (self-signed cert) - required by the Azure Key Vault SDK,
+                      # which refuses bearer auth over plain HTTP; the backend trusts the
+                      # cert via AzureAuthKeyVault:DangerousAcceptAnyServerCertificate.
+    command: ["--global-response-templating", "--disable-banner", "--https-port", "8443"]
+    volumes:
+      - ${LOCAL_WORKSPACE_FOLDER:-..}/.devcontainer/local/infrastructure-settings/wiremock:/home/wiremock:ro
+    # From inside the devcontainer: http://wiremock:8080 (https://wiremock:8443 for Key Vault)
+
+  # --- n8n (AI-assist workflow engine, real product - not a mock) ---
+  # AiChatAssist:BaseUrl in settings.Local.json points here. The real vendor
+  # workflows are not in this repo, so canned stand-ins from
+  # .devcontainer/local/infrastructure-settings/n8n/workflows/ are imported and activated on every start
+  # (idempotent - stable workflow ids make re-imports an upsert). They answer
+  # the three webhook routes the backend calls (see
+  # Core/AlertManager.Services/HelpdeskAiAssistantServices/N8NIntegrationService.cs).
+  # Edit/inspect workflows in the n8n UI: http://localhost:5678
+  n8n:
+    image: n8nio/n8n:latest
+    user: "${SIDECAR_UID:-1000}:${SIDECAR_GID:-1000}"
+    networks: [mspprocess-infra]
+    ports:
+      - "5678:5678"
+    environment:
+      # All writable state lives in the bind mount below (sqlite DB included);
+      # HOME moves too since the image's /home/node isn't writable for SIDECAR_UID.
+      - N8N_USER_FOLDER=/n8n-data
+      - HOME=/n8n-data
+      # DEV-ONLY key: pins sqlite credential encryption across container recreations.
+      - N8N_ENCRYPTION_KEY=local-dev-n8n-encryption-key
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_SECURE_COOKIE=false
+      - N8N_RUNNERS_ENABLED=true
+    entrypoint: ["/bin/sh", "-c"]
+    # Import deactivates existing published workflows, so re-publish each seed
+    # workflow BY ID afterwards (ids are pinned in the seed JSONs; the
+    # update:workflow fallback covers older n8n CLIs without publish:workflow).
+    command:
+      - >-
+        n8n import:workflow --separate --input=/n8n-seed &&
+        for id in mspplocalaichat01 mspplocalaiva0001 mspplocalaimsg001; do
+        n8n publish:workflow --id=$$id || n8n update:workflow --id=$$id --active=true || exit 1;
+        done &&
+        exec n8n start
+    volumes:
+      - ${LOCAL_WORKSPACE_FOLDER:-..}/.adlc-artifacts/n8n_data:/n8n-data
+      - ${LOCAL_WORKSPACE_FOLDER:-..}/.devcontainer/local/infrastructure-settings/n8n/workflows:/n8n-seed:ro
+    # From inside the devcontainer: http://n8n:5678 (webhooks at /webhook/<path>)

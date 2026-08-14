@@ -1,0 +1,31 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Web/sites/[^/]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "id": "/subscriptions/local-sub/resourceGroups/local-rg/providers/Microsoft.Web/sites/{{request.pathSegments.[7]}}",
+      "name": "{{request.pathSegments.[7]}}",
+      "type": "Microsoft.Web/sites",
+      "kind": "app",
+      "location": "Central US",
+      "properties": {
+        "name": "{{request.pathSegments.[7]}}",
+        "state": "Running",
+        "defaultHostName": "local-dev.azurewebsites.net",
+        "customDomainVerificationId": "LOCALDEVCUSTOMDOMAINVERIFICATIONID",
+        "possibleInboundIpAddresses": "127.0.0.1",
+        "inboundIpAddress": "127.0.0.1",
+        "hostNames": [
+          "local-dev.azurewebsites.net",
+          ".com", ".org", ".net", ".io", ".co", ".us", ".uk", ".ca", ".ai", ".biz", ".info", ".group", ".support", ".technology"
+        ],
+        "enabledHostNames": ["local-dev.azurewebsites.net"],
+        "httpsOnly": true
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/chargebee/api/v2/unbilled_charges"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "unbilled_charges": [
+        {
+          "unbilled_charge": {
+            "id": "ubc-local-dev-{{randomValue length=8 type='NUMERIC'}}",
+            "customer_id": "cust-local-dev-0001",
+            "amount": 1000,
+            "currency_code": "USD",
+            "entity_type": "adhoc",
+            "is_voided": false,
+            "deleted": false,
+            "object": "unbilled_charge"
+          }
+        }
+      ]
+    }
+  }
+}

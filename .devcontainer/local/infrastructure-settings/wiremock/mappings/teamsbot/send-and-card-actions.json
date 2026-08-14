@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/botapi/(botMessages/send|techBotMessages/(send|updateAdaptiveCard|postMentionReply|postHistoryReply))"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {}
+  }
+}

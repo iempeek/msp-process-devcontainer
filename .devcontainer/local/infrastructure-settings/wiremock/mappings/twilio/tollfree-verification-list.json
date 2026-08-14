@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v1/Tollfree/Verifications"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "meta": {
+        "page": 0,
+        "page_size": 50,
+        "first_page_url": "{{{request.url}}}",
+        "previous_page_url": null,
+        "next_page_url": null,
+        "url": "{{{request.url}}}",
+        "key": "verifications"
+      },
+      "verifications": []
+    }
+  }
+}

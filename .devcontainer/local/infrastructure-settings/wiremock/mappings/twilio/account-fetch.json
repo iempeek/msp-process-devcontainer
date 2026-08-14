@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/2010-04-01/Accounts/[^/]+\\.json"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "sid": "{{regexExtract request.path '(?<=Accounts/)[^.]+'}}",
+      "friendly_name": "WireMock Twilio account",
+      "status": "active",
+      "type": "Full",
+      "auth_token": "wiremock-auth-token",
+      "owner_account_sid": "{{regexExtract request.path '(?<=Accounts/)[^.]+'}}",
+      "date_created": "Wed, 05 Aug 2026 12:00:00 +0000",
+      "date_updated": "Wed, 05 Aug 2026 12:00:00 +0000",
+      "uri": "{{{request.path}}}"
+    }
+  }
+}

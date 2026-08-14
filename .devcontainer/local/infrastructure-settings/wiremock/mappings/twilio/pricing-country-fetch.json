@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v1/PhoneNumbers/Countries/[^/]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "country": "WireMock country",
+      "iso_country": "{{request.pathSegments.[3]}}",
+      "price_unit": "USD",
+      "phone_number_prices": [
+        { "number_type": "local", "base_price": "1.15", "current_price": "1.15" },
+        { "number_type": "mobile", "base_price": "1.15", "current_price": "1.15" },
+        { "number_type": "toll free", "base_price": "2.15", "current_price": "2.15" }
+      ],
+      "url": "{{{request.url}}}"
+    }
+  }
+}

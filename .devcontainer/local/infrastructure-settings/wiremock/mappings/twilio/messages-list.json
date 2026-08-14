@@ -1,0 +1,38 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/2010-04-01/Accounts/[^/]+/Messages\\.json"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "first_page_uri": "{{{request.path}}}?Page=0&PageSize=50",
+      "end": 0,
+      "start": 0,
+      "previous_page_uri": null,
+      "next_page_uri": null,
+      "page": 0,
+      "page_size": 50,
+      "uri": "{{{request.url}}}",
+      "messages": [
+        {
+          "sid": "SMwiremock000000000000000000000001",
+          "account_sid": "ACwiremock000000000000000000000001",
+          "status": "delivered",
+          "to": "+15005550100",
+          "from": "+15005550006",
+          "body": "[wiremock] canned outbound message",
+          "direction": "outbound-api",
+          "num_segments": "1",
+          "num_media": "0",
+          "error_code": null,
+          "error_message": null,
+          "date_created": "Wed, 05 Aug 2026 12:00:00 +0000",
+          "date_updated": "Wed, 05 Aug 2026 12:00:00 +0000",
+          "date_sent": "Wed, 05 Aug 2026 12:00:01 +0000"
+        }
+      ]
+    }
+  }
+}

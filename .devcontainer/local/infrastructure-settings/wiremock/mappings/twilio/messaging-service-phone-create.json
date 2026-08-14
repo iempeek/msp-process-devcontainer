@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/v1/Services/[^/]+/PhoneNumbers"
+  },
+  "response": {
+    "status": 201,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "sid": "PNwiremock000000000000000000000001",
+      "account_sid": "ACwiremock000000000000000000000001",
+      "service_sid": "{{request.pathSegments.[2]}}",
+      "phone_number": "+15005550006",
+      "country_code": "US",
+      "capabilities": ["SMS", "MMS", "Voice"],
+      "date_created": "2026-08-05T12:00:00Z",
+      "date_updated": "2026-08-05T12:00:00Z"
+    }
+  }
+}

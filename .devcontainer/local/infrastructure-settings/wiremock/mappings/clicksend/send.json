@@ -1,0 +1,37 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/v3/(sms|mms|voice)/send"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "http_code": 200,
+      "response_code": "SUCCESS",
+      "response_msg": "Messages queued for delivery.",
+      "data": {
+        "total_price": 0.0,
+        "total_count": 1,
+        "queued_count": 1,
+        "messages": [
+          {
+            "to": "{{jsonPath request.body '$.messages.[0].to'}}",
+            "from": "{{jsonPath request.body '$.messages.[0].from'}}",
+            "body": "{{jsonPath request.body '$.messages.[0].body'}}",
+            "message_id": "{{randomValue type='UUID'}}",
+            "message_parts": 1,
+            "message_price": 0.0,
+            "status": "SUCCESS"
+          }
+        ],
+        "_currency": {
+          "currency_name_short": "USD",
+          "currency_prefix_d": "$",
+          "currency_prefix_c": "c",
+          "currency_name_long": "US Dollars"
+        }
+      }
+    }
+  }
+}

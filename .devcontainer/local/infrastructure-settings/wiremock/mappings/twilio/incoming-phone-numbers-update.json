@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/2010-04-01/Accounts/[^/]+/IncomingPhoneNumbers/[^/]+\\.json"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "sid": "{{regexExtract request.path '(?<=IncomingPhoneNumbers/)[^.]+'}}",
+      "account_sid": "ACwiremock000000000000000000000001",
+      "phone_number": "+15005550006",
+      "friendly_name": "WireMock incoming number",
+      "status": "in-use",
+      "capabilities": { "voice": true, "sms": true, "mms": true, "fax": false },
+      "sms_url": "",
+      "voice_url": "",
+      "date_created": "Wed, 05 Aug 2026 12:00:00 +0000",
+      "date_updated": "Wed, 05 Aug 2026 12:00:00 +0000"
+    }
+  }
+}

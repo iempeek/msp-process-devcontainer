@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/chargebee/api/v2/subscriptions/[^/]+/discounts"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": { "list": [], "next_offset": null }
+  }
+}

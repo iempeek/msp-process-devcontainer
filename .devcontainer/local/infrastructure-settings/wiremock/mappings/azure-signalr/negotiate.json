@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/signalr/negotiate"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "url": "http://localhost:5229/hub",
+      "accessToken": "local-dev-signalr-access-token"
+    }
+  }
+}

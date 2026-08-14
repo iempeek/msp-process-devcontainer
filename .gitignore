@@ -1,0 +1,20 @@
+# Workspace root of the shared MSPProcess devcontainer. Only .devcontainer/
+# (and this file) belong to this repo - the product checkouts below are their
+# own repos, cloned in beside it.
+
+# The two checkouts this devcontainer serves. Folder names are configurable via
+# BACKEND_DIR_NAME / FRONTEND_DIR_NAME in .devcontainer/devcontainer.json; if
+# you rename a checkout, rename it here too.
+/MSPProcess/
+/mspprocess-ui/
+
+# Host-local secrets, loaded into the container via runArgs --env-file.
+# initialize.sh creates it; link-local-settings.sh seeds the required keys.
+.env
+
+# Devcontainer runtime state: sidecar data dirs bind-mounted by compose.yaml,
+# the shared pnpm/yarn caches, local-stack pids/logs/selection, and the
+# host ~/.claude mount target.
+.adlc-artifacts/
+
+.claude

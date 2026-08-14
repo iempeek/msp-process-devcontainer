@@ -1,0 +1,15 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/subscriptions/[^/]+/resourcegroups"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "value": [
+        { "id": "/subscriptions/local-sub/resourceGroups/local-rg", "name": "local-rg", "location": "centralus" }
+      ]
+    }
+  }
+}

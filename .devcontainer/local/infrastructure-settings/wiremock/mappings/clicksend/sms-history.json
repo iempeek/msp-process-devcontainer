@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v3/sms/history"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "http_code": 200,
+      "response_code": "SUCCESS",
+      "response_msg": "Here are your data.",
+      "data": {
+        "total": 1,
+        "per_page": 50,
+        "current_page": 1,
+        "last_page": 1,
+        "next_page_url": null,
+        "prev_page_url": null,
+        "from": 1,
+        "to": 1,
+        "data": [
+          {
+            "direction": "out",
+            "to": "+15005550100",
+            "from": "+15005550006",
+            "body": "[wiremock] canned ClickSend outbound message",
+            "message_id": "wiremock-clicksend-msg-0001",
+            "status_text": "Delivered"
+          }
+        ]
+      }
+    }
+  }
+}

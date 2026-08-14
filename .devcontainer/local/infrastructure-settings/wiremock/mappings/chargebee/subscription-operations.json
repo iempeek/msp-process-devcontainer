@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/chargebee/api/v2/subscriptions/[^/]+/(update_for_items|pause|cancel_for_items)"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "subscription": {
+        "id": "{{request.pathSegments.[4]}}",
+        "customer_id": "cust-local-dev-0001",
+        "status": "active",
+        "currency_code": "USD",
+        "start_date": 1754000000,
+        "started_at": 1754000000,
+        "next_billing_at": 2147483647,
+        "deleted": false,
+        "object": "subscription",
+        "subscription_items": [
+          { "item_price_id": "Std_core_25000", "item_type": "plan", "quantity": 1, "unit_price": 25000, "amount": 25000, "object": "subscription_item" },
+          { "item_price_id": "Std_addOn_2500", "item_type": "addon", "quantity": 5, "unit_price": 2500, "amount": 12500, "object": "subscription_item" }
+        ],
+        "coupons": []
+      },
+      "customer": {
+        "id": "cust-local-dev-0001",
+        "first_name": "Local",
+        "last_name": "Developer",
+        "email": "local-dev-billing@wiremock.local",
+        "deleted": false,
+        "object": "customer"
+      }
+    }
+  }
+}

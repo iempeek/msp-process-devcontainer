@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/chargebee/api/v2/metered_features"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "metered_feature": {
+        "id": "{{formData request.body 'form' urlDecode=true}}{{#if form.name}}{{form.name}}{{else}}wiremock-metered-feature{{/if}}",
+        "status": "active",
+        "object": "metered_feature"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/2010-04-01/Accounts/[^/]+/Calls\\.json"
+  },
+  "response": {
+    "status": 201,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "sid": "CA{{randomValue length=32 type='ALPHANUMERIC' uppercase=false}}",
+      "account_sid": "ACwiremock000000000000000000000001",
+      "status": "queued",
+      "to": "{{formData request.body 'form' urlDecode=true}}{{form.To}}",
+      "from": "{{form.From}}",
+      "direction": "outbound-api",
+      "date_created": "Wed, 05 Aug 2026 12:00:00 +0000",
+      "date_updated": "Wed, 05 Aug 2026 12:00:00 +0000"
+    }
+  }
+}

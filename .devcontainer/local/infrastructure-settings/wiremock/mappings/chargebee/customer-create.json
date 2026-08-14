@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/chargebee/api/v2/customers"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "customer": {
+        "id": "cust-local-dev-{{randomValue length=8 type='NUMERIC'}}",
+        "first_name": "{{formData request.body 'form' urlDecode=true}}{{#if form.first_name}}{{form.first_name}}{{else}}Local{{/if}}",
+        "last_name": "{{#if form.last_name}}{{form.last_name}}{{else}}Developer{{/if}}",
+        "email": "{{#if form.email}}{{form.email}}{{else}}local-dev-billing@wiremock.local{{/if}}",
+        "auto_collection": "on",
+        "deleted": false,
+        "object": "customer"
+      },
+      "card": {
+        "status": "valid",
+        "last4": "4242",
+        "card_type": "visa",
+        "expiry_month": 12,
+        "expiry_year": 2030,
+        "masked_number": "************4242",
+        "object": "card"
+      }
+    }
+  }
+}

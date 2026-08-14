@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Web/sites/[^/]+/analyzeCustomHostname"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "customDomainVerificationTest": "Passed",
+      "customDomainVerificationFailureInfo": null,
+      "isHostnameAlreadyVerified": true,
+      "hasConflictOnScaleUnit": false,
+      "hasConflictAcrossSubscription": false,
+      "aRecords": [],
+      "cNameRecords": ["local-dev.azurewebsites.net"],
+      "domainLevel": "{{request.query.hostname}}",
+      "tld": "com"
+    }
+  }
+}

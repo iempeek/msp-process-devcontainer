@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/v1/Tollfree/Verifications"
+  },
+  "response": {
+    "status": 201,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "sid": "HH{{randomValue length=32 type='ALPHANUMERIC' uppercase=false}}",
+      "status": "PENDING_REVIEW",
+      "tollfree_phone_number_sid": "{{formData request.body 'form' urlDecode=true}}{{form.TollfreePhoneNumberSid}}",
+      "date_created": "2026-08-05T12:00:00Z",
+      "date_updated": "2026-08-05T12:00:00Z"
+    }
+  }
+}

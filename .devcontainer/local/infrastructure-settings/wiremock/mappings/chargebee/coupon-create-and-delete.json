@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/chargebee/api/v2/coupons/(create_for_items|[^/]+/delete)"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "coupon": {
+        "id": "{{formData request.body 'form' urlDecode=true}}{{#if form.id}}{{form.id}}{{else}}wiremock-coupon{{/if}}",
+        "name": "WireMock coupon",
+        "discount_type": "percentage",
+        "discount_percentage": 10.0,
+        "duration_type": "forever",
+        "apply_on": "invoice_amount",
+        "status": "active",
+        "object": "coupon"
+      }
+    }
+  }
+}

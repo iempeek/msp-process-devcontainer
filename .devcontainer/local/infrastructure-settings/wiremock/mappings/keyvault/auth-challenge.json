@@ -1,0 +1,20 @@
+{
+  "priority": 3,
+  "request": {
+    "method": "ANY",
+    "urlPathPattern": "/(secrets|deletedsecrets)/.*",
+    "headers": {
+      "Authorization": { "absent": true }
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json",
+      "WWW-Authenticate": "Bearer authorization=\"https://wiremock:8443/local-dev-tenant-id\", resource=\"https://wiremock:8443\""
+    },
+    "jsonBody": {
+      "error": { "code": "Unauthorized", "message": "AKV10000: Request is missing a Bearer or PoP token (wiremock challenge - keep tenant id in sync with AzureAuthKeyVault:ClientTenantId)." }
+    }
+  }
+}

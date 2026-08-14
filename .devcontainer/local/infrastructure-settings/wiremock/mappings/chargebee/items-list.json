@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/chargebee/api/v2/items",
+    "queryParameters": {
+      "id[is]": {
+        "matches": ".+"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "list": [
+        {
+          "item": {
+            "id": "{{lookup request.query 'id[is]'}}",
+            "name": "WireMock item",
+            "type": "plan",
+            "status": "active",
+            "item_family_id": "MSPProcess",
+            "object": "item"
+          }
+        }
+      ],
+      "next_offset": null
+    }
+  }
+}

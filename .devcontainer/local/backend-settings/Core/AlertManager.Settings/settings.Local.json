@@ -1,0 +1,169 @@
+{
+  "_comment_1": "Local dev overlay for the docker sidecars (.devcontainer/compose.yaml). Lives in .devcontainer/local-settings/, symlinked to Core/AlertManager.Settings/settings.Local.json by .devcontainer/link-local-settings.sh. Gitignored - never commit.",
+  "_comment_2": "Loaded LAST by AppConfig (over settings.json and settings.Development.json), and SKIPS Azure Key Vault entirely when ASPNETCORE_ENVIRONMENT=Development and MSPPROCESS_USE_LOCAL_SETTINGS=true (both set in devcontainer.json) - see AppConfig.cs.",
+  "_comment_3": "Non-emulatable external services (Twilio, ClickSend, ChargeBee, Postmark, Teams bot messaging, n8n, legacy Azure SignalR negotiate, ARM domain management) are replaced by logging mocks via LocalMocks:Enabled below - see Core/AlertManager.Services/LocalMocks/.",
+  "_comment_4": "CosmosDb, Pusher (soketi), Stripe (stripe-mock) and SMTP (Mailpit) point at real emulator/simulator sidecars instead of mocks - see compose.yaml.",
+  "Database": {
+    "ConnectionString": "Server=mssql;Database=MspProcess;User Id=sa;Password=MsppDev_password1;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=True",
+    "TechConnectionString": "Server=mssql;Database=MspProcessTech;User Id=sa;Password=MsppDev_password1;TrustServerCertificate=True;Encrypt=False"
+  },
+  "Auth": {
+    "Key": "local-dev-only-jwt-signing-key-0123456789abcdef0123456789abcdef"
+  },
+  "ClientPortalAuth": {
+    "Key": "local-dev-only-client-portal-jwt-key-0123456789abcdef0123456789ab"
+  },
+  "Azure": {
+    "ConnectionString": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1",
+    "SignalRApiUrl": "http://localhost:5229",
+    "NegotiateSignalRUrl": "http://wiremock:8080/signalr/negotiate",
+    "ApiAccessData": {
+      "ManagementUrl": "http://wiremock:8080",
+      "LoginUrl": "http://wiremock:8080",
+      "ClientId": "local-dev-client-id",
+      "DirectoryId": "local-dev-tenant-id",
+      "ClientSecret": "local-dev-client-secret",
+      "SubscriptionId": "local-sub",
+      "ResourceGroup": "local-rg",
+      "WebInstanceName": "local-web"
+    }
+  },
+  "CosmosDb": {
+    "Host": "mongo",
+    "Port": 27017,
+    "UseTls": false,
+    "UserName": "",
+    "Password": ""
+  },
+  "EmailOptions": {
+    "SmtpOptions": {
+      "Host": "mailpit",
+      "Port": 1025,
+      "EnableSsl": false,
+      "UserName": "",
+      "Password": ""
+    }
+  },
+  "PusherSettings": {
+    "ChatPusher": {
+      "AppId": "local-app",
+      "Key": "local-key",
+      "Secret": "local-secret",
+      "HostName": "soketi",
+      "Port": 6001,
+      "Encrypted": false,
+      "ClientHostName": "localhost",
+      "ClientPort": 6001
+    },
+    "LiveChatPusher": {
+      "AppId": "local-app",
+      "Key": "local-key",
+      "Secret": "local-secret",
+      "HostName": "soketi",
+      "Port": 6001,
+      "Encrypted": false,
+      "ClientHostName": "localhost",
+      "ClientPort": 6001
+    },
+    "ClientPortalPusher": {
+      "AppId": "local-app",
+      "Key": "local-key",
+      "Secret": "local-secret",
+      "HostName": "soketi",
+      "Port": 6001,
+      "Encrypted": false,
+      "ClientHostName": "localhost",
+      "ClientPort": 6001
+    },
+    "AuthAppPusher": {
+      "AppId": "local-app",
+      "Key": "local-key",
+      "Secret": "local-secret",
+      "HostName": "soketi",
+      "Port": 6001,
+      "Encrypted": false,
+      "ClientHostName": "localhost",
+      "ClientPort": 6001
+    }
+  },
+  "Stripe": {
+    "ApiKey": "sk_test_local",
+    "ApiBase": "http://stripe-mock:12111"
+  },
+  "Postmark": {
+    "ApiUrl": "http://wiremock:8080",
+    "InboundWebhook": "http://localhost:7144/api/ProcessEmail"
+  },
+  "PsaWebHooks": {
+    "ApiUrl": "http://localhost:7071/api/hooks/",
+    "ApiCode": "local"
+  },
+  "FrontEnd": {
+    "Url": "http://localhost:3000",
+    "AuthUrl": "http://localhost:3001",
+    "PodUrl": "http://localhost:3002",
+    "NewPodUrl": "http://localhost:3002"
+  },
+  "AssistantDetails": {
+    "ApiKey": "local-dev-assistant-api-key"
+  },
+  "OAuthServer": {
+    "Enabled": false
+  },
+  "PushNotifications": {
+    "IsEnabled": false
+  },
+  "SuperUser": {
+    "Password": "LocalDev1!"
+  },
+  "CryptoKey": "local-dev-only-crypto-key-0123456789abcdef",
+  "ApiKeyForTesting": "local-dev-only-api-key-for-testing",
+  "MessagingApiKey": "local-dev-only-messaging-api-key",
+  "TeamsMessagingKey": "local-dev-only-teams-messaging-key",
+  "SignalRKey": "local-dev-signalr-key",
+  "SuperAdminKey": "local-dev-only-super-admin-key",
+  "UsageExport": {
+    "McpIntrospectionSecret": "local-dev-only-mcp-introspection-secret"
+  },
+  "Redis": {
+    "ConnectionString": "redis:6379,abortConnect=false"
+  },
+  "Twilio": {
+    "ApiBaseUrl": "http://wiremock:8080",
+    "AccountSid": "ACwiremock000000000000000000000001",
+    "AuthToken": "local-dev-twilio-auth-token",
+    "CampaignSid": "MGwiremock000000000000000000000001",
+    "FailedSmsWebHookUrl": "http://localhost:5000/api/hooks/twilio/failed-sms"
+  },
+  "ClickSend": {
+    "ApiUrl": "http://wiremock:8080/v3",
+    "UserName": "local-dev-clicksend-user",
+    "ApiKey": "local-dev-clicksend-api-key",
+    "NumberFrom": "+15005550006",
+    "NumberFromAu": "+61455550006",
+    "NumberFromCa": "+15005550007",
+    "NumberFromNz": "4567"
+  },
+  "ChargeBee": {
+    "ApiUrl": "http://wiremock:8080/chargebee/api/v2",
+    "SiteName": "local-dev-site",
+    "ApiKey": "local-dev-chargebee-api-key"
+  },
+  "AiChatAssist": {
+    "Environment": "local",
+    "BaseUrl": "http://n8n:5678",
+    "MessagesApiKey": "local-dev-n8n-api-key"
+  },
+  "AzureAuthKeyVault": {
+    "Url": "https://wiremock:8443",
+    "ClientId": "local-dev-client-id",
+    "ClientTenantId": "local-dev-tenant-id",
+    "AuthorityHost": "https://wiremock:8443",
+    "DangerousAcceptAnyServerCertificate": true
+  },
+  "MicrosoftTeamsBot": {
+    "BotUrl": "http://wiremock:8080/botapi/",
+    "BotId": "local-dev-bot-id",
+    "TechBotId": "local-dev-tech-bot-id"
+  }
+}

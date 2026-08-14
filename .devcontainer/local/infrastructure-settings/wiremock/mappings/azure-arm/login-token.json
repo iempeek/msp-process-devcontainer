@@ -1,0 +1,20 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/[^/]+/oauth2/token"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "token_type": "Bearer",
+      "expires_in": 3599,
+      "ext_expires_in": 3599,
+      "expires_on": 2147483647,
+      "not_before": 2147483647,
+      "resource": "https://management.azure.com/",
+      "access_token": "local-dev-arm-access-token-refreshed",
+      "refresh_token": "local-dev-arm-refresh-token"
+    }
+  }
+}

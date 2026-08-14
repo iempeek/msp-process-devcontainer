@@ -1,0 +1,184 @@
+{
+  // Display name of this devcontainer in VS Code's UI (window title, container picker).
+  "name": "mspprocess-devcontainer",
+
+  // WORKSPACE LAYOUT - this is the thing to understand before editing anything
+  // below. This devcontainer is SHARED by the backend and the frontend, lives in
+  // its own git repo, and is opened on the PARENT folder that holds both
+  // checkouts (not on either repo):
+  //
+  //   <workspace>/          <- ${localWorkspaceFolder}: opened in VS Code
+  //     .devcontainer/      <- THIS repo
+  //     .env                <- runArgs --env-file (gitignored, host-local)
+  //     .adlc-artifacts/    <- sidecar data, frontend caches, local-stack state
+  //     MSPProcess/         <- backend  (BACKEND_DIR_NAME, has its own .claude)
+  //     mspprocess-ui/      <- frontend (FRONTEND_DIR_NAME)
+  //
+  // Both checkouts are therefore inside the single workspace bind mount, and
+  // either one may be absent: the scripts skip the steps that need it. The agent
+  // harness (.claude) stays in the backend checkout and is used from there.
+
+  // Base image the container is built FROM. Everything else (features, post-create)
+  // layers on top of this. Swap it to change OS/base tooling.
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+
+  // Prebuilt, composable tool installers layered onto the image at build time.
+  // Catalog: https://containers.dev/features
+  // Options/README per feature: https://github.com/devcontainers/features/tree/main/src/<name>
+  "features": {
+    // https://github.com/devcontainers/features/tree/main/src/node
+    "ghcr.io/devcontainers/features/node:1": {},
+
+    // https://github.com/devcontainers/features/tree/main/src/git
+    "ghcr.io/devcontainers/features/git:1": {},
+
+    // https://github.com/devcontainers/features/tree/main/src/dotnet
+    // Solution targets net8.0 (global.json pins SDK 8.0.100, rollForward latestMajor).
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "8.0"
+    },
+
+    // https://github.com/devcontainers/features/tree/main/src/docker-outside-of-docker
+    // Reuses the HOST docker daemon via /var/run/docker.sock (no DinD perf hit).
+    // Caveat: bind mounts issued from inside the container must use HOST paths.
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+
+  // Editor-specific config injected into the container session: which VS Code
+  // extensions to auto-install and which settings to apply inside the container.
+  "customizations": {
+    "vscode": {
+      // Extension IDs: search on https://marketplace.visualstudio.com,
+      // ID is on the extension page under "Unique Identifier"
+      "extensions": [
+        "ms-dotnettools.csharp"
+      ],
+      "settings": {
+        // Force the C# extension to use OmniSharp instead of the newer Roslyn LSP
+        "dotnet.server.useOmnisharp": true,
+        "omnisharp.useModernNet": true,
+        "omnisharp.enableRoslynAnalyzers": true,
+        "omnisharp.enableEditorConfigSupport": true
+      }
+    }
+  },
+
+  // Runs on the HOST before the container is created/started. Pre-creates
+  // .env (runArgs --env-file hard-fails if missing) and all mount sources/
+  // targets - the docker daemon creates missing ones as ROOT, which would
+  // leave .adlc-artifacts/ unwritable inside the container.
+  // A single string is interpreted by the HOST's default shell (cmd.exe on
+  // Windows, sh on Linux/macOS), so this is a polyglot: on Windows, cmd.exe
+  // runs the quoted .bat path directly and `||` short-circuits; on
+  // Linux/macOS, sh can't execute a non-executable .bat file (no +x bit,
+  // no shebang), fails immediately, and `||` falls through to bash
+  // initialize.sh.
+  "initializeCommand": "\"${localWorkspaceFolder}\\.devcontainer\\initialize_win.bat\" || bash \"${localWorkspaceFolder}/.devcontainer/initialize.sh\"",
+
+  // Runs ONCE after the container is first created: installs all CLI tooling
+  // (trivy, snyk, qodana, omnisharp, agent tools). Idempotent on rebuilds.
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  // Runs on EVERY container start: layers local dev settings into the source
+  // tree (symlinks into .devcontainer/local/backend-settings/), then PREPARES
+  // the infra - creates the shared network (compose.yaml) on the host daemon,
+  // attaches this devcontainer to it, pre-creates the sidecar data dirs and
+  // starts the soketi relay. It does NOT start the sidecars: most sessions
+  // don't need them, and ~10 containers cost minutes and RAM on every start.
+  // Start them on demand (and only the ones you select) with
+  //   bash .devcontainer/local-stack.sh --run [-c <selection>]
+  // or the whole set with `bash .devcontainer/infra-up.sh --with-sidecars`.
+  "postStartCommand": "bash .devcontainer/link-local-settings.sh && bash .devcontainer/infra-up.sh",
+
+  // Extra bind mounts from host into the container, beyond the workspace itself.
+  // Here: host ~/.claude mounted into the workspace's .adlc-artifacts/ (gitignored) and
+  // pointed to by CLAUDE_CONFIG_DIR below, so Claude Code inside the container
+  // reads/writes the SAME config as the host - auth, MCP authorizations, etc.
+  // all carry over instead of starting from a fresh, ephemeral container copy.
+  // The home dir is HOME on Linux/macOS and USERPROFILE on Windows (HOME is
+  // unset in a plain cmd/PowerShell session), and an unset ${localEnv:...}
+  // substitutes to the empty string - so concatenating both yields whichever
+  // one this host actually has. initialize_win.bat pre-creates
+  // %USERPROFILE%\.claude for the Windows case, initialize.sh $HOME/.claude
+  // for the other. Caveat: a Windows shell that sets BOTH (Git Bash, MSYS)
+  // would concatenate two paths - run `devcontainer up` from cmd/PowerShell.
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=${containerWorkspaceFolder}/.adlc-artifacts/claude,type=bind,consistency=cached"
+
+    // NOTE: there is no separate mount for the frontend checkout any more. This
+    // devcontainer is opened on the PARENT folder that holds both checkouts, so
+    // mspprocess-ui is already inside the workspace bind mount. It used to live
+    // in a sibling folder outside the workspace and be mounted at /frontend
+    // (and before that, bind-mounted into a `frontend` compose sidecar, now
+    // retired - the Vite dev servers run natively in THIS container, on demand,
+    // via .devcontainer/local-stack.sh --run).
+  ],
+
+  // Ports published on the HOST by this container. Previously the frontend
+  // sidecar published these (it relayed 5000/5229/5033 back here); with that
+  // sidecar gone, the devcontainer itself has to, or nothing on the host can
+  // reach the local stack. An agent driving the browser through the
+  // `playwright` MCP does not need these - they exist for a HUMAN opening
+  // http://localhost:3000 in a host browser.
+  "appPort": [
+    "3000:3000",
+    "3001:3001",
+    "3002:3002",
+    "3004:3004",
+    "3005:3005",
+    "3006:3006",
+    "3008:3008",
+    "5000:5000",
+    "5229:5229",
+    "5033:5033"
+  ],
+
+  // Raw arguments appended to the `docker run` that creates this container.
+  // Here: load secrets/config from the workspace's .env as container env vars
+  // (e.g. SNYK_TOKEN for headless snyk auth).
+  "runArgs": ["--env-file", "${localWorkspaceFolder}/.env"],
+
+  // Static environment variables baked into every process in the container.
+  // (Unlike runArgs --env-file, these are fixed values committed to the repo.).
+  // Don't put any secrets here. All secrets should live in project's root's local-only .env file.
+  "containerEnv": {
+    // Folder names of the two checkouts inside this workspace. Every script
+    // here resolves them through these (BACKEND_ROOT / FE_ROOT), so a clone
+    // under a different name only needs the value changed in one place.
+    // A workspace missing one of them still builds - the checkout-specific
+    // steps skip themselves.
+    "BACKEND_DIR_NAME": "MSPProcess",
+    "FRONTEND_DIR_NAME": "mspprocess-ui",
+
+    // .NET telemetry opt-out
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+    "DOTNET_NOLOGO": "1",
+
+    // Backend local-run switches: AppConfig (Core/AlertManager.Settings) loads
+    // settings.Local.json ONLY when the env is Development AND this flag is on.
+    // (Never set ASPNETCORE_ENVIRONMENT=Local - that DISABLES the local file.)
+    "ASPNETCORE_ENVIRONMENT": "Development",
+    "MSPPROCESS_USE_LOCAL_SETTINGS": "true",
+
+    // Claude Code telemetry opt-out
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+
+    // Points Claude Code at the host-mounted .adlc-artifacts/claude (see mounts above)
+    // instead of the container-local ~/.claude, so config/auth/MCP state is shared.
+    "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/.adlc-artifacts/claude",
+
+    // HOST path of this workspace. compose.yaml bind-mounts sidecar data dirs under
+    // .adlc-artifacts/ - with docker-outside-of-docker the daemon resolves bind
+    // sources on the HOST, so compose needs the host path, not /workspaces/...
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+
+    // SonarQube internal docker container
+    "SONAR_HOST_URL": "http://sonarqube:9000"
+  },
+
+  // Which user your terminal/processes run as inside the container
+  // (the base image's non-root user; avoids root-owned files in the workspace).
+  "remoteUser": "vscode"
+}

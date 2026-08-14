@@ -1,0 +1,40 @@
+{
+  "id": "mspplocalaimsg001",
+  "name": "[local] AI messages webhook stand-in",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "api/ai/messages",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "9a1f0003-0000-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "9a1f0003-0000-4000-8000-00000000ff03"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"output_text\": \"This is a canned AI reply from the local n8n sidecar (workflow: [local] AI messages webhook stand-in).\" }",
+        "options": {}
+      },
+      "id": "9a1f0003-0000-4000-8000-000000000002",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [220, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

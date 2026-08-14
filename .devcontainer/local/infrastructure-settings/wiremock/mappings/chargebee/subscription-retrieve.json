@@ -1,0 +1,66 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/chargebee/api/v2/subscriptions/[^/]+"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "subscription": {
+        "id": "{{request.pathSegments.[4]}}",
+        "customer_id": "cust-local-dev-0001",
+        "status": "active",
+        "currency_code": "USD",
+        "billing_period": 1,
+        "billing_period_unit": "month",
+        "start_date": 1754000000,
+        "started_at": 1754000000,
+        "next_billing_at": 2147483647,
+        "created_at": 1754000000,
+        "updated_at": 1754000000,
+        "deleted": false,
+        "object": "subscription",
+        "subscription_items": [
+          { "item_price_id": "Std_core_25000", "item_type": "plan", "quantity": 1, "unit_price": 25000, "amount": 25000, "object": "subscription_item" },
+          { "item_price_id": "Std_addOn_2500", "item_type": "addon", "quantity": 5, "unit_price": 2500, "amount": 12500, "object": "subscription_item" }
+        ],
+        "coupons": []
+      },
+      "customer": {
+        "id": "cust-local-dev-0001",
+        "first_name": "Local",
+        "last_name": "Developer",
+        "email": "local-dev-billing@wiremock.local",
+        "phone": "+15005550006",
+        "auto_collection": "on",
+        "deleted": false,
+        "object": "customer",
+        "billing_address": {
+          "first_name": "Local",
+          "last_name": "Developer",
+          "line1": "1 Dev Street",
+          "line2": "",
+          "city": "Springfield",
+          "state": "IL",
+          "country": "US",
+          "zip": "62701",
+          "object": "billing_address"
+        }
+      },
+      "card": {
+        "status": "valid",
+        "first_name": "Local",
+        "last_name": "Developer",
+        "iin": "424242",
+        "last4": "4242",
+        "card_type": "visa",
+        "expiry_month": 12,
+        "expiry_year": 2030,
+        "masked_number": "************4242",
+        "customer_id": "cust-local-dev-0001",
+        "object": "card"
+      }
+    }
+  }
+}

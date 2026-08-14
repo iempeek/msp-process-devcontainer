@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/chargebee/api/v2/item_families"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "list": [
+        { "item_family": { "id": "MSPProcess", "name": "MSPProcess", "status": "active", "object": "item_family" } }
+      ],
+      "next_offset": null
+    }
+  }
+}

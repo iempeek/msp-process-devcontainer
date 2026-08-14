@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/2010-04-01/Accounts/[^/]+/Messages\\.json"
+  },
+  "response": {
+    "status": 201,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "sid": "SM{{randomValue length=32 type='ALPHANUMERIC' uppercase=false}}",
+      "account_sid": "ACwiremock000000000000000000000001",
+      "status": "queued",
+      "to": "{{formData request.body 'form' urlDecode=true}}{{form.To}}",
+      "from": "{{form.From}}",
+      "body": "{{form.Body}}",
+      "direction": "outbound-api",
+      "num_segments": "1",
+      "num_media": "0",
+      "error_code": null,
+      "error_message": null,
+      "date_created": "Wed, 05 Aug 2026 12:00:00 +0000",
+      "date_updated": "Wed, 05 Aug 2026 12:00:00 +0000",
+      "date_sent": null
+    }
+  }
+}

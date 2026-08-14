@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/chargebee/api/v2/item_prices"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "item_price": {
+        "id": "{{formData request.body 'form' urlDecode=true}}{{#if form.id}}{{form.id}}{{else}}wiremock-item-price{{/if}}",
+        "name": "WireMock item price",
+        "status": "active",
+        "currency_code": "USD",
+        "object": "item_price"
+      }
+    }
+  }
+}

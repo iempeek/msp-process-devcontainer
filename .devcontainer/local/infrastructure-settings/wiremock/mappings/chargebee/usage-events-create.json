@@ -1,0 +1,17 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/chargebee/api/v2/usage_events"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "usage_event": {
+        "deduplication_id": "{{formData request.body 'form' urlDecode=true}}{{form.deduplication_id}}",
+        "subscription_id": "{{form.subscription_id}}",
+        "object": "usage_event"
+      }
+    }
+  }
+}

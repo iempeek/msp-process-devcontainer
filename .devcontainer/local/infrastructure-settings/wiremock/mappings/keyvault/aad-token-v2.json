@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/[^/]+/oauth2/v2.0/token"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "token_type": "Bearer",
+      "expires_in": 3599,
+      "ext_expires_in": 3599,
+      "access_token": "local-dev-keyvault-access-token"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/v1/Services"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "meta": {
+        "page": 0,
+        "page_size": 50,
+        "first_page_url": "{{{request.url}}}",
+        "previous_page_url": null,
+        "next_page_url": null,
+        "url": "{{{request.url}}}",
+        "key": "services"
+      },
+      "services": [
+        {
+          "sid": "MGwiremock000000000000000000000001",
+          "account_sid": "ACwiremock000000000000000000000001",
+          "friendly_name": "WireMock messaging service",
+          "date_created": "2026-08-05T12:00:00Z",
+          "date_updated": "2026-08-05T12:00:00Z"
+        }
+      ]
+    }
+  }
+}

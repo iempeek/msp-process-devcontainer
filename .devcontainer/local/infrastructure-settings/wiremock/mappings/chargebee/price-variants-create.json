@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/chargebee/api/v2/price_variants"
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "price_variant": {
+        "id": "{{formData request.body 'form' urlDecode=true}}{{#if form.id}}{{form.id}}{{else}}wiremock-price-variant{{/if}}",
+        "name": "WireMock price variant",
+        "status": "active",
+        "object": "price_variant"
+      }
+    }
+  }
+}
