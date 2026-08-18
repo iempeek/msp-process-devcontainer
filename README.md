@@ -10,7 +10,7 @@ debug the whole stack.
 ```
 <workspace>/          <- clone this repo here; open THIS folder in VS Code
   .devcontainer/      <- everything in this repo
-  .env                <- host-local secrets (created for you, never committed)
+  .env                <- dev secrets, created in-container on start (never committed)
   .adlc-artifacts/     <- sidecar data, frontend caches, local-stack state
   MSPProcess/         <- backend checkout   (BACKEND_DIR_NAME)
   mspprocess-ui/      <- frontend checkout  (FRONTEND_DIR_NAME)
@@ -42,7 +42,10 @@ up on demand, and only the selected ones, via `local-stack.sh --run` below
 (`infra-up.sh --with-sidecars` starts the whole set at once).
 
 Fill in any `[REQUIRED]` placeholders that `link-local-settings.sh` seeds into
-`.env` before using the integrations that need them.
+`.env` before using the integrations that need them. `.env` lives at the
+workspace root and is only ever created/read from INSIDE the container -
+`local-stack.sh` sources it into each backend host it launches, so a change
+takes effect on the next `--run`, with no container rebuild.
 
 ## Running the stack
 
@@ -68,7 +71,7 @@ one is a one-line change.
 |---|---|
 | `devcontainer.json` | image, features, mounts, ports, container env |
 | `compose.yaml` | infrastructure sidecars (run on the HOST daemon) |
-| `host-bootstrap.sh` | HOST pre-create (runs in a throwaway alpine container, so one file covers every host OS): dirs and `.env` the daemon must not create as root |
+| `host-bootstrap.sh` | HOST pre-create (runs in a throwaway alpine container, so one file covers every host OS): normalizes CRLF->LF in these scripts, then creates the mount dirs the daemon must not create as root |
 | `post-create.sh` | one-time: CLI toolbox, agent harnesses, scanners |
 | `link-local-settings.sh` | symlinks `local/backend-settings/` into the backend checkout |
 | `infra-up.sh` | every start: network join, sidecar data dirs, soketi relay (sidecars only with `--with-sidecars`) |

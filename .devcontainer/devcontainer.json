@@ -9,7 +9,8 @@
   //
   //   <workspace>/          <- ${localWorkspaceFolder}: opened in VS Code
   //     .devcontainer/      <- THIS repo
-  //     .env                <- runArgs --env-file (gitignored, host-local)
+  //     .env                <- host-local secrets, created IN-container by
+  //                            link-local-settings.sh (gitignored)
   //     .adlc-artifacts/    <- sidecar data, frontend caches, local-stack state
   //     MSPProcess/         <- backend  (BACKEND_DIR_NAME, has its own .claude)
   //     mspprocess-ui/      <- frontend (FRONTEND_DIR_NAME)
@@ -63,10 +64,9 @@
     }
   },
 
-  // Runs on the HOST before the container is created/started. Pre-creates
-  // .env (runArgs --env-file hard-fails if missing) and all mount sources/
-  // targets - the docker daemon creates missing ones as ROOT, which would
-  // leave .adlc-artifacts/ unwritable inside the container.
+  // Runs on the HOST before the container is created/started. Pre-creates all
+  // mount sources/targets - the docker daemon creates missing ones as ROOT,
+  // which would leave .adlc-artifacts/ unwritable inside the container.
   //
   // The host has no shell we can count on (sh on Linux/macOS, cmd.exe on
   // Windows), but it is guaranteed to have a working docker - the devcontainer
@@ -157,13 +157,21 @@
     "5033:5033"
   ],
 
-  // Raw arguments appended to the `docker run` that creates this container.
-  // Here: load secrets/config from the workspace's .env as container env vars
-  // (e.g. SNYK_TOKEN for headless snyk auth).
-  "runArgs": ["--env-file", "${localWorkspaceFolder}/.env"],
+  // NO runArgs. This used to carry `--env-file ${localWorkspaceFolder}/.env`,
+  // which made container creation depend on a host file existing before
+  // anything in this repo had run: initializeCommand had to pre-create .env,
+  // and that write is refused on Windows hosts (it goes through the Docker
+  // Desktop bind-mount translation layer as root). Injecting the file at
+  // `docker run` time bought little anyway - it is a dev-secrets file, read by
+  // the processes that need it. So .env is now an IN-container file only:
+  // link-local-settings.sh (postStartCommand) creates and seeds it,
+  // sonarqube-bootstrap.sh appends SONAR_* to it, and local-stack.sh sources it
+  // into the environment of the dotnet/func hosts it launches (the Vite dev
+  // servers already sourced their own env.<slug> the same way). Anything else
+  // that wants it: `set -a; . "$WS_ROOT/.env"; set +a`.
 
   // Static environment variables baked into every process in the container.
-  // (Unlike runArgs --env-file, these are fixed values committed to the repo.).
+  // (Unlike .env, these are fixed values committed to the repo.).
   // Don't put any secrets here. All secrets should live in project's root's local-only .env file.
   "containerEnv": {
     // Folder names of the two checkouts inside this workspace. Every script

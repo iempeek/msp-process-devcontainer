@@ -48,7 +48,8 @@ find "$SRC_ROOT" -type f | while IFS= read -r src; do
 done
 
 # Seed .env with the env-var secrets the backend needs but that must never be
-# committed anywhere (loaded into the container via runArgs --env-file).
+# committed anywhere. local-stack.sh sources this file into the environment of
+# each dotnet/func host it starts (there is no docker --env-file any more).
 # Only appends keys that are absent - existing values are never touched.
 ENV_FILE="$WS_ROOT/.env"
 touch "$ENV_FILE"

@@ -8,8 +8,10 @@
 /MSPProcess/
 /mspprocess-ui/
 
-# Host-local secrets, loaded into the container via runArgs --env-file.
-# host-bootstrap.sh creates it; link-local-settings.sh seeds the required keys.
+# Dev secrets. Created and seeded IN the container by link-local-settings.sh on
+# every start, and sourced by local-stack.sh into the backend hosts it launches.
+# Nothing on the host creates or reads it (that used to be host-bootstrap.sh, for
+# runArgs --env-file - both are gone; the host write is refused on Windows).
 .env
 
 # Devcontainer runtime state: sidecar data dirs bind-mounted by compose.yaml,

@@ -463,6 +463,22 @@ record_started() { # <id> <pid> <url>
   STARTED_IDS+=("$1")
 }
 
+# The workspace .env holds the dev secrets the backend hosts need as ENV VARS
+# (MSPPROCESS_AZURE_*_KV_CLIENTSECRET, seeded by link-local-settings.sh; SONAR_*
+# appended by sonarqube-bootstrap.sh). It used to be injected by docker at
+# container-creation time (devcontainer.json runArgs --env-file), which forced
+# the file to exist on the HOST before anything ran - a write that Windows hosts
+# refuse. It is now loaded here instead, per host process, exactly like the Vite
+# dev servers load their env.<slug> (see local-stack-frontend.sh). Missing file
+# is fine: the hosts start without the secrets, same as an unfilled .env did.
+load_workspace_env() {
+  [ -f "$WS_ROOT/.env" ] || return 0
+  set -a
+  # shellcheck disable=SC1091
+  . "$WS_ROOT/.env"
+  set +a
+}
+
 start_dotnet_host() {
   local id="$1" project="${LS_TARGET[$1]}" port="${LS_PORT[$1]}"
   # Bind 0.0.0.0 (not localhost) so anything reaching this host over the docker
@@ -478,7 +494,7 @@ start_dotnet_host() {
   # open (so callers piping this script's output, e.g. `| tail`, never see
   # EOF even though every real host is up and healthy). `$!` after `&` is
   # then the true, only PID for this host.
-  (cd "$BACKEND_ROOT" && exec nohup dotnet run --project "$project" --no-launch-profile --urls "http://0.0.0.0:$port" \
+  (cd "$BACKEND_ROOT" && load_workspace_env && exec nohup dotnet run --project "$project" --no-launch-profile --urls "http://0.0.0.0:$port" \
     > "$LOG_DIR/${id}.log" 2>&1 < /dev/null) &
   local pid=$!
   sleep 2
@@ -490,7 +506,7 @@ start_func_host() {
   echo "[INFO] Starting $id (${LS_LABEL[$id]}) on http://localhost:$port"
   # See the comment in start_dotnet_host for why `exec` (not a plain
   # backgrounded job) is required here.
-  (cd "$BACKEND_ROOT/$project_dir" && exec nohup func start --port "$port" \
+  (cd "$BACKEND_ROOT/$project_dir" && load_workspace_env && exec nohup func start --port "$port" \
     > "$LOG_DIR/${id}.log" 2>&1 < /dev/null) &
   local pid=$!
   sleep 2

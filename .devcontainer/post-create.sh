@@ -113,7 +113,7 @@ setup_worktrees_dir() {
     grep -qx '.worktrees/' "$BACKEND_ROOT/.gitignore" 2>/dev/null \
       || echo '.worktrees/' >> "$BACKEND_ROOT/.gitignore"
   fi
-  # .env holds real tokens (see runArgs --env-file) and now lives at the
+  # .env holds real tokens (sourced by local-stack.sh) and now lives at the
   # workspace root, so it is the DEVCONTAINER repo that must ignore it.
   grep -qx '.env' "$WS_ROOT/.gitignore" 2>/dev/null || echo '.env' >> "$WS_ROOT/.gitignore"
 }

@@ -29,7 +29,8 @@ TOKEN_NAME="${SONAR_TOKEN_NAME:-devcontainer}"
 
 command -v jq >/dev/null 2>&1 || { echo "[ERROR] jq not installed - run post-create.sh" >&2; exit 1; }
 
-# Locate the workspace .env (same file devcontainer.json loads via --env-file).
+# Locate the workspace .env (same file link-local-settings.sh seeds and
+# local-stack.sh sources into the backend hosts).
 # Anchored on this script's own location rather than `git rev-parse`, which
 # would answer with whichever checkout the caller happens to stand in.
 WS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

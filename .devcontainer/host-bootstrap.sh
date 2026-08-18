@@ -17,7 +17,6 @@
 #
 # It pre-creates, USER-owned, everything the docker daemon would otherwise
 # auto-create as ROOT and thereby brick later steps:
-#   * .env                      - runArgs --env-file hard-fails if missing
 #   * .adlc-artifacts/claude    - mount TARGET; missing targets are created by
 #                                 the daemon as root INSIDE the workspace bind
 #                                 mount, leaving .adlc-artifacts/ unwritable for vscode
@@ -47,11 +46,15 @@ reown() {
   chown "$REF_UID:$REF_GID" "$1" 2>/dev/null || true
 }
 
-# --- .env: runArgs --env-file hard-fails if the file does not exist ----------
-if [ ! -e /w/.env ]; then
-  : > /w/.env
-  reown /w/.env
-fi
+# NOTE: this script deliberately does NOT create the workspace .env. It used to,
+# because devcontainer.json passed it to `docker run --env-file`, which hard-fails
+# on a missing file. Creating it from here failed on Windows hosts (the write goes
+# through the Docker Desktop bind-mount translation layer as root and is refused),
+# and the --env-file dependency is gone, so nothing needs the file to exist before
+# the container is created. .env is now purely an IN-container file: created and
+# seeded by link-local-settings.sh on every start, extended by
+# sonarqube-bootstrap.sh, and sourced by local-stack.sh when it launches the
+# backend hosts.
 
 # --- host ~/.claude: bind SOURCE for the mounts entry ------------------------
 # Docker auto-creates the source if it is missing, so by the time this runs the
