@@ -79,12 +79,24 @@
   // ARRAY form on purpose: it is exec'd directly, with no host shell in the
   // middle, so Windows paths (backslashes, spaces, `C:` colons) reach docker
   // verbatim instead of being mangled by sh or cmd quoting rules.
+  //
+  // LINE ENDINGS: git-for-windows defaults to core.autocrlf=true, so on a
+  // Windows host these .sh files can land on disk with CRLF. `sh` then takes
+  // the trailing \r as part of every token and the script dies on its first
+  // line, which the CLI reports only as "The initializeCommand ... failed".
+  // .gitattributes (repo root) forces LF for fresh checkouts; the tr/cat loop
+  // below repairs a checkout that predates it (or was made with a stale
+  // config) in place, for every script in this folder - not just this one, so
+  // post-create/post-start/local-stack are fixed before they ever run. It is a
+  // no-op on an already-LF tree. `cat >` truncates in place, so file ownership
+  // on a Linux host is preserved.
   "initializeCommand": [
     "docker", "run", "--rm",
     "-v", "${localWorkspaceFolder}:/w",
     "-v", "${localEnv:HOME}${localEnv:USERPROFILE}/.claude:/hostclaude",
     "alpine:3.20",
-    "sh", "/w/.devcontainer/host-bootstrap.sh"
+    "sh", "-c",
+    "set -e; for f in /w/.devcontainer/*.sh; do if grep -q \"$(printf '\\r')\" \"$f\"; then echo \"host-bootstrap: normalizing CRLF -> LF in ${f#/w/}\"; tr -d '\\r' < \"$f\" > /tmp/lf && cat /tmp/lf > \"$f\"; fi; done; exec sh /w/.devcontainer/host-bootstrap.sh"
   ],
 
   // Runs ONCE after the container is first created: installs all CLI tooling

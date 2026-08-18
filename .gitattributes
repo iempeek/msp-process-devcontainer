@@ -1,0 +1,40 @@
+# =============================================================================
+# Line endings
+#
+# Every script in .devcontainer/ is executed by a POSIX shell - either inside
+# the throwaway alpine container that runs initializeCommand (host-bootstrap.sh)
+# or by bash inside the devcontainer (post-create / post-start / local-stack).
+# Git for Windows ships with core.autocrlf=true by default, which would check
+# these out with CRLF; `sh` then reads the trailing \r as part of every token
+# and the script dies on its first line ("set: - invalid option", "syntax
+# error: unexpected end of file"), which surfaces as an opaque
+# "initializeCommand ... failed" from the devcontainer CLI.
+#
+# So: normalize to LF in the index AND force LF in the working tree, on every
+# OS, regardless of the user's autocrlf setting. Nothing here needs CRLF - the
+# consumer of every file in this repo is a Linux container.
+#
+# After adding/changing this file, an EXISTING Windows checkout still has CRLF
+# on disk. Fix it once with:
+#     git add --renormalize .
+#     git checkout -- .
+# =============================================================================
+
+* text=auto eol=lf
+
+# Be explicit for the file types that actually break, so intent survives even
+# if the blanket rule above is ever narrowed.
+*.sh    text eol=lf
+*.mjs   text eol=lf
+*.json  text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.md    text eol=lf
+env.*   text eol=lf
+
+# Never touch binaries.
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.gz    binary
+*.zip   binary
