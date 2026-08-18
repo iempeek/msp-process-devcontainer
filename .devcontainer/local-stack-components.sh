@@ -290,6 +290,16 @@ ls_list_components() {
   done
   echo ""
   echo "Presets: all none sidecar backend frontend dotnet func feapp ${!LS_EXTRA_PRESETS[*]}"
+  echo ""
+  echo "Notes for -c callers:"
+  echo "  - Selecting any backend component (kind dotnet/func) automatically adds the"
+  echo "    sidecars it cannot boot without ($LS_INFRA_DEPS) - do not list them yourself."
+  echo "  - Every other sidecar is opt-in: name it only if the code path under test"
+  echo "    actually reaches it (e.g. mailpit for SMTP, stripe-mock for billing,"
+  echo "    soketi for Pusher, wiremock for stubbed third-party HTTP)."
+  echo "  - Frontend apps talk to the backend over its port above, so a UI flow needs"
+  echo "    the app AND the host serving it (e.g. -c api,fe-web)."
+  echo "  - Ids/presets are the ONLY valid -c values; an unknown token is a hard error."
 }
 
 # ---------------------------------------------------------------------------
@@ -391,8 +401,12 @@ ls_menu() {
 # Precedence: explicit spec > menu > remembered selection > "all" (the
 # historical behaviour of these scripts).
 # ---------------------------------------------------------------------------
+# ls_choose_selection <spec> <want_menu> <script_name> [save]
+# save defaults to true. Pass "false" (local-stack.sh --run --no-save) when the
+# caller is a tool rather than a person: an automated selection must not
+# overwrite the human's remembered "what this box can afford to run".
 ls_choose_selection() {
-  local spec="$1" want_menu="$2" script_name="$3" show_menu=false
+  local spec="$1" want_menu="$2" script_name="$3" save="${4:-true}" show_menu=false
 
   if [ -n "$spec" ]; then
     ls_resolve_spec "$spec" || return 1
@@ -413,8 +427,8 @@ ls_choose_selection() {
       return 1
     fi
     ls_menu || return 1
-    ls_save_selection
-  elif [ -n "$spec" ]; then
+    [ "$save" = true ] && ls_save_selection
+  elif [ -n "$spec" ] && [ "$save" = true ]; then
     ls_save_selection
   fi
 

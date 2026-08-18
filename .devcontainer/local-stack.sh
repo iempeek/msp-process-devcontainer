@@ -40,9 +40,14 @@
 #
 #   Other flags:
 #     --detach, -d             start everything and exit instead of streaming
+#     --no-save                start this selection WITHOUT remembering it, so
+#                              the next bare --run still uses your own choice.
+#                              For tool callers that pick a selection per task
+#                              (the ADLC harness's "run" command passes it).
 #
 #   The selection is remembered in .adlc-artifacts/local-stack/selection
-#   (gitignored), so the next run without flags starts the same subset.
+#   (gitignored), so the next run without flags starts the same subset -
+#   unless --no-save says otherwise.
 #   UNCHECKED COMPONENTS ARE SIMPLY NOT STARTED - nothing already running is
 #   stopped for you except the selected hosts themselves (restarted, so
 #   re-running is idempotent). Stop things with --stop.
@@ -495,7 +500,7 @@ start_func_host() {
 mode_run() {
   set -e
 
-  local SPEC="" WANT_MENU=auto DETACH=false
+  local SPEC="" WANT_MENU=auto DETACH=false SAVE=true
   while [ "$#" -gt 0 ]; do
     case "$1" in
       -c|--components)
@@ -508,6 +513,7 @@ mode_run() {
       --menu)    WANT_MENU=true;  shift ;;
       --no-menu) WANT_MENU=false; shift ;;
       --detach|-d) DETACH=true; shift ;;
+      --no-save)   SAVE=false; shift ;;
       *)
         echo "[ERROR] $SELF --run: unknown argument: $1" >&2
         usage >&2
@@ -519,7 +525,7 @@ mode_run() {
   # the menu, so fall back to the remembered selection.
   [ "$DETACH" = true ] && [ "$WANT_MENU" = auto ] && WANT_MENU=false
 
-  ls_choose_selection "$SPEC" "$WANT_MENU" "$SELF --run" || exit 1
+  ls_choose_selection "$SPEC" "$WANT_MENU" "$SELF --run" "$SAVE" || exit 1
 
   if [ -z "$(ls_selected_ids)" ]; then
     echo "[INFO] Nothing selected - nothing to do."
