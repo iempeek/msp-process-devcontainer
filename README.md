@@ -68,7 +68,7 @@ one is a one-line change.
 |---|---|
 | `devcontainer.json` | image, features, mounts, ports, container env |
 | `compose.yaml` | infrastructure sidecars (run on the HOST daemon) |
-| `initialize.sh` / `initialize_win.bat` | HOST pre-create: dirs and `.env` the daemon must not create as root |
+| `host-bootstrap.sh` | HOST pre-create (runs in a throwaway alpine container, so one file covers every host OS): dirs and `.env` the daemon must not create as root |
 | `post-create.sh` | one-time: CLI toolbox, agent harnesses, scanners |
 | `link-local-settings.sh` | symlinks `local/backend-settings/` into the backend checkout |
 | `infra-up.sh` | every start: network join, sidecar data dirs, soketi relay (sidecars only with `--with-sidecars`) |

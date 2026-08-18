@@ -67,13 +67,25 @@
   // .env (runArgs --env-file hard-fails if missing) and all mount sources/
   // targets - the docker daemon creates missing ones as ROOT, which would
   // leave .adlc-artifacts/ unwritable inside the container.
-  // A single string is interpreted by the HOST's default shell (cmd.exe on
-  // Windows, sh on Linux/macOS), so this is a polyglot: on Windows, cmd.exe
-  // runs the quoted .bat path directly and `||` short-circuits; on
-  // Linux/macOS, sh can't execute a non-executable .bat file (no +x bit,
-  // no shebang), fails immediately, and `||` falls through to bash
-  // initialize.sh.
-  "initializeCommand": "\"${localWorkspaceFolder}\\.devcontainer\\initialize_win.bat\" || bash \"${localWorkspaceFolder}/.devcontainer/initialize.sh\"",
+  //
+  // The host has no shell we can count on (sh on Linux/macOS, cmd.exe on
+  // Windows), but it is guaranteed to have a working docker - the devcontainer
+  // cannot be built otherwise. So instead of one script per host OS kept in
+  // sync by hand, the work runs as plain POSIX sh inside a throwaway alpine
+  // container with the two paths it must touch bind-mounted in: the workspace
+  // at /w and the host's ~/.claude at /hostclaude. See host-bootstrap.sh,
+  // including how it keeps what it creates owned by the human, not root.
+  //
+  // ARRAY form on purpose: it is exec'd directly, with no host shell in the
+  // middle, so Windows paths (backslashes, spaces, `C:` colons) reach docker
+  // verbatim instead of being mangled by sh or cmd quoting rules.
+  "initializeCommand": [
+    "docker", "run", "--rm",
+    "-v", "${localWorkspaceFolder}:/w",
+    "-v", "${localEnv:HOME}${localEnv:USERPROFILE}/.claude:/hostclaude",
+    "alpine:3.20",
+    "sh", "/w/.devcontainer/host-bootstrap.sh"
+  ],
 
   // Runs ONCE after the container is first created: installs all CLI tooling
   // (trivy, snyk, qodana, omnisharp, agent tools). Idempotent on rebuilds.
@@ -98,9 +110,9 @@
   // The home dir is HOME on Linux/macOS and USERPROFILE on Windows (HOME is
   // unset in a plain cmd/PowerShell session), and an unset ${localEnv:...}
   // substitutes to the empty string - so concatenating both yields whichever
-  // one this host actually has. initialize_win.bat pre-creates
-  // %USERPROFILE%\.claude for the Windows case, initialize.sh $HOME/.claude
-  // for the other. Caveat: a Windows shell that sets BOTH (Git Bash, MSYS)
+  // one this host actually has. host-bootstrap.sh pre-creates it (the same
+  // concatenation is used for its /hostclaude mount, so both agree by
+  // construction). Caveat: a Windows shell that sets BOTH (Git Bash, MSYS)
   // would concatenate two paths - run `devcontainer up` from cmd/PowerShell.
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=${containerWorkspaceFolder}/.adlc-artifacts/claude,type=bind,consistency=cached"

@@ -24,7 +24,7 @@
 #   service for why.
 #
 # Ownership model:
-#   initialize.sh pre-creates every bind source/target USER-owned on the host
+#   host-bootstrap.sh pre-creates every bind source/target USER-owned on the host
 #   (the daemon creates missing ones as root - never let it). Services with
 #   data dirs run AS THAT UID via `user:` (infra-up.sh exports SIDECAR_UID/GID)
 #   so data stays plain user-owned - no chmod, no root-owned files in the repo.

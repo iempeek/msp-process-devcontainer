@@ -66,7 +66,7 @@ else
 fi
 
 # 3. Sidecar data dirs (bind-mounted from .adlc-artifacts/, see compose.yaml).
-#    initialize.sh pre-creates these USER-owned on the host; the mkdir here
+#    host-bootstrap.sh pre-creates these USER-owned on the host; the mkdir here
 #    only covers manual `bash infra-up.sh` runs. Sidecars run AS THIS UID
 #    (compose `user:` + the export below), so plain user ownership is enough -
 #    no permission widening. Keep the dir list in sync with compose.yaml.
@@ -82,7 +82,7 @@ if ! mkdir -p "$ARTIFACTS/mongo_data" "$ARTIFACTS/azurite_data" \
     "$ARTIFACTS/n8n_data" "$ARTIFACTS/frontend/cache"; then
   echo "[ERROR] infra-up: $ARTIFACTS is not writable. It was likely auto-created" >&2
   echo "        root-owned by the docker daemon (missing mount target). Fix on the" >&2
-  echo "        host: sudo rm -rf .adlc-artifacts && bash .devcontainer/initialize.sh" >&2
+  echo "        host: sudo rm -rf .adlc-artifacts, then reopen the devcontainer" >&2
   exit 1
 fi
 
