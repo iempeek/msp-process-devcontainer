@@ -34,9 +34,14 @@
     "ghcr.io/devcontainers/features/git:1": {},
 
     // https://github.com/devcontainers/features/tree/main/src/dotnet
-    // Solution targets net8.0 (global.json pins SDK 8.0.100, rollForward latestMajor).
+    // Solution targets net10.0 (global.json pins SDK 10.0.0, rollForward
+    // latestMajor - which only rolls UP, so an older SDK here fails every
+    // `dotnet` command in the backend with "A compatible .NET SDK was not
+    // found"). Keep this in step with MSPProcess/global.json.
+    // Need an older runtime side by side? Add "additionalVersions": "8.0"
+    // rather than lowering "version".
     "ghcr.io/devcontainers/features/dotnet:2": {
-      "version": "8.0"
+      "version": "10.0"
     },
 
     // https://github.com/devcontainers/features/tree/main/src/docker-outside-of-docker
@@ -55,11 +60,11 @@
         "ms-dotnettools.csharp"
       ],
       "settings": {
-        // Force the C# extension to use OmniSharp instead of the newer Roslyn LSP
-        "dotnet.server.useOmnisharp": true,
-        "omnisharp.useModernNet": true,
-        "omnisharp.enableRoslynAnalyzers": true,
-        "omnisharp.enableEditorConfigSupport": true
+        // NO OmniSharp. `dotnet.server.useOmnisharp` used to be forced on here,
+        // but omnisharp-roslyn tops out around .NET 8 / C# 12 and cannot load
+        // this solution's net10.0 projects - the SDK bump alone would have left
+        // IntelliSense and in-editor builds broken. Unset, the C# extension uses
+        // its own Roslyn language server, which tracks the installed SDK.
       }
     }
   },
@@ -100,7 +105,7 @@
   ],
 
   // Runs ONCE after the container is first created: installs all CLI tooling
-  // (trivy, snyk, qodana, omnisharp, agent tools). Idempotent on rebuilds.
+  // (trivy, snyk, qodana, agent tools). Idempotent on rebuilds.
   "postCreateCommand": "bash .devcontainer/post-create.sh",
 
   // Runs on EVERY container start: layers local dev settings into the source
@@ -212,5 +217,6 @@
 
   // Which user your terminal/processes run as inside the container
   // (the base image's non-root user; avoids root-owned files in the workspace).
-  "remoteUser": "vscode"
+  "remoteUser": "root",
+  "updateRemoteUserUID": false
 }

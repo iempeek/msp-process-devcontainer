@@ -10,7 +10,7 @@
 #   * Every step is an idempotent function - safe to re-run on rebuilds.
 #   * CORE steps (apt toolbox, symlinks, worktrees) hard-fail: without them
 #     the container is broken, so creation SHOULD abort.
-#   * OPTIONAL tools (scanners, omnisharp) soft-fail: a flaky download must
+#   * OPTIONAL tools (scanners, agent CLIs) soft-fail: a flaky download must
 #     not brick container creation. Failures are collected and reported at
 #     the end; re-run `bash .devcontainer/post-create.sh` to retry.
 #   * Add a new tool? Write a function, register it in main().
@@ -141,7 +141,7 @@ install_claude_code() {
 # -----------------------------------------------------------------------------
 # opencode - second terminal agent harness alongside Claude Code. Its installer
 # drops the binary in ~/.opencode/bin; --no-modify-path keeps shell rc files
-# untouched and the /usr/local/bin symlink (same trick as omnisharp) puts it on
+# untouched and the /usr/local/bin symlink (same trick as fd/bat) puts it on
 # PATH for every shell, login or not.
 # Docs: https://opencode.ai/docs/
 # Pin a version: `| bash -s -- --version 1.0.180 --no-modify-path`.
@@ -236,7 +236,7 @@ install_uv() {
 # is gutted - even `import json` fails - so install a complete uv-managed
 # CPython. uv shims it into ~/.local/bin, which sits AFTER /usr/bin on PATH, so
 # `python3` would still hit the broken one; the /usr/local/bin symlinks (same
-# trick as fd/bat/omnisharp) win instead. Absolute-path shebangs like
+# trick as fd/bat) win instead. Absolute-path shebangs like
 # /usr/bin/python3 in system scripts are untouched.
 # Requires install_uv to have run. Pin a version: `uv python install 3.13 ...`.
 # -----------------------------------------------------------------------------
@@ -256,11 +256,14 @@ install_python() {
 }
 
 # -----------------------------------------------------------------------------
-# OmniSharp standalone - headless C# LSP server, usable outside VS Code.
-# (VS Code's C# extension manages its own copy; this one is for scripting/CI.)
-# Docs: https://github.com/OmniSharp/omnisharp-roslyn
-# Usage: omnisharp -s /workspaces/<repo> -lsp
+# REMOVED: OmniSharp standalone (omnisharp-roslyn). It only understands up to
+# .NET 8 / C# 12, so it cannot load this solution's net10.0 projects - it
+# installed fine but was dead weight. VS Code gets C# support from the Roslyn
+# language server bundled with ms-dotnettools.csharp (see devcontainer.json).
+# If something scripted needs a headless C# LSP again, install
+# Microsoft.CodeAnalysis.LanguageServer instead, not this.
 # -----------------------------------------------------------------------------
+
 # Browser for the `playwright` MCP server (.mcp.json), which is how an agent
 # looks at the running frontend. The MCP package itself ships NO browser - it
 # drives an installed one, and its default is the Chrome *channel*, i.e. a real
@@ -271,15 +274,6 @@ install_playwright_browser() {
   command -v google-chrome >/dev/null 2>&1 && return 0
   sudo -E env "PATH=$PATH" npx --yes playwright@latest install --with-deps chrome
   google-chrome --version
-}
-
-install_omnisharp() {
-  command -v omnisharp >/dev/null 2>&1 && return 0
-  local dir=/opt/omnisharp
-  sudo mkdir -p "$dir"
-  curl -fsSL https://github.com/OmniSharp/omnisharp-roslyn/releases/latest/download/omnisharp-linux-x64-net6.0.tar.gz \
-    | sudo tar xz -C "$dir"
-  sudo ln -sf "$dir/OmniSharp" /usr/local/bin/omnisharp
 }
 
 # =============================================================================
@@ -301,7 +295,6 @@ main() {
   run_optional "uv (python package manager)"        install_uv
   run_optional "python (uv-managed, global)"        install_python
   install_quality_gate_scanners
-  run_optional "omnisharp"                          install_omnisharp
   run_optional "chrome (for the playwright MCP)"    install_playwright_browser
 
   if [ "${#FAILED_OPTIONAL[@]}" -gt 0 ]; then
