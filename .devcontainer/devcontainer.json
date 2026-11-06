@@ -73,6 +73,10 @@
         // this solution's net10.0 projects - the SDK bump alone would have left
         // IntelliSense and in-editor builds broken. Unset, the C# extension uses
         // its own Roslyn language server, which tracks the installed SDK.
+
+        // Editor TypeScript = the main app's (5.x), not VS Code's bundled TS 6,
+        // which flags every tsconfig `baseUrl` as deprecated.
+        "typescript.tsdk": "mspprocess-ui/Web/AlertManager.Web/node_modules/typescript/lib"
       }
     }
   },
