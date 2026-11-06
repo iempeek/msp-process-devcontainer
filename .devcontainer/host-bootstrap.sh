@@ -51,10 +51,9 @@ reown() {
 # on a missing file. Creating it from here failed on Windows hosts (the write goes
 # through the Docker Desktop bind-mount translation layer as root and is refused),
 # and the --env-file dependency is gone, so nothing needs the file to exist before
-# the container is created. .env is now purely an IN-container file: created and
-# seeded by link-local-settings.sh on every start, extended by
-# sonarqube-bootstrap.sh, and sourced by local-stack.sh when it launches the
-# backend hosts.
+# the container is created. .env is now purely an IN-container, optional file:
+# written by sonarqube-bootstrap.sh and sourced by local-stack.sh when it
+# launches the backend hosts.
 
 # --- host ~/.claude: bind SOURCE for the mounts entry ------------------------
 # Docker auto-creates the source if it is missing, so by the time this runs the

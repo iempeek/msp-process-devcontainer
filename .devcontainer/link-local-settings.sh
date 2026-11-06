@@ -83,15 +83,5 @@ find "$SRC_ROOT" -type f | while IFS= read -r src; do
   echo "[INFO] linked $rel"
 done
 
-# Seed .env with the env-var secrets the backend needs but that must never be
-# committed anywhere. local-stack.sh sources this file into the environment of
-# each dotnet/func host it starts (there is no docker --env-file any more).
-# Only appends keys that are absent - existing values are never touched.
-ENV_FILE="$WS_ROOT/.env"
-touch "$ENV_FILE"
-for key in MSPPROCESS_AZURE_KV_CLIENTSECRET MSPPROCESS_AZURE_AUTH_KV_CLIENTSECRET; do
-  if ! grep -q "^${key}=" "$ENV_FILE"; then
-    echo "${key}=[REQUIRED]" >> "$ENV_FILE"
-    echo "[INFO] seeded ${key}=[REQUIRED] in .env - fill in the real dev value."
-  fi
-done
+# Key Vault access is RBAC now (DefaultAzureCredential -> `az login`), so .env is
+# no longer seeded with MSPPROCESS_AZURE_*_KV_CLIENTSECRET placeholders.

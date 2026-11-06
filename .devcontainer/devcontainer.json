@@ -30,6 +30,13 @@
     // https://github.com/devcontainers/features/tree/main/src/node
     "ghcr.io/devcontainers/features/node:1": {},
 
+    // https://github.com/devcontainers/features/tree/main/src/azure-cli
+    // The backend reaches Key Vault through RBAC (DefaultAzureCredential ->
+    // `az login`), not client secrets. Sign in once with
+    // `az login --use-device-code --tenant <Alert Manager tenant id>`; the
+    // login lives in the mspprocess-azure volume (see "mounts").
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+
     // https://github.com/devcontainers/features/tree/main/src/git
     "ghcr.io/devcontainers/features/git:1": {},
 
@@ -132,7 +139,10 @@
   // construction). Caveat: a Windows shell that sets BOTH (Git Bash, MSYS)
   // would concatenate two paths - run `devcontainer up` from cmd/PowerShell.
   "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=${containerWorkspaceFolder}/.adlc-artifacts/claude,type=bind,consistency=cached"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=${containerWorkspaceFolder}/.adlc-artifacts/claude,type=bind,consistency=cached",
+
+    // Azure CLI login, kept across container rebuilds.
+    "source=mspprocess-azure,target=/root/.azure,type=volume"
 
     // NOTE: there is no separate mount for the frontend checkout any more. This
     // devcontainer is opened on the PARENT folder that holds both checkouts, so
