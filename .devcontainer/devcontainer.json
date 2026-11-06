@@ -142,7 +142,13 @@
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=${containerWorkspaceFolder}/.adlc-artifacts/claude,type=bind,consistency=cached",
 
     // Azure CLI login, kept across container rebuilds.
-    "source=mspprocess-azure,target=/root/.azure,type=volume"
+    "source=mspprocess-azure,target=/root/.azure,type=volume",
+
+    // pnpm content-addressable store on a NAMED volume, not under the workspace
+    // bind mount: on macOS (virtiofs) pnpm's parallel copies of one store file
+    // into many node_modules paths fail with ESTALE ("Unknown system error
+    // -116"). See FE_PNPM_STORE_DIR in containerEnv / local-stack-frontend.sh.
+    "source=mspprocess-pnpm-store,target=/pnpm-store,type=volume"
 
     // NOTE: there is no separate mount for the frontend checkout any more. This
     // devcontainer is opened on the PARENT folder that holds both checkouts, so
@@ -206,6 +212,9 @@
     // (Never set ASPNETCORE_ENVIRONMENT=Local - that DISABLES the local file.)
     "ASPNETCORE_ENVIRONMENT": "Development",
     "MSPPROCESS_USE_LOCAL_SETTINGS": "true",
+
+    // pnpm store location (the named volume in "mounts").
+    "FE_PNPM_STORE_DIR": "/pnpm-store",
 
     // Claude Code telemetry opt-out
     "DISABLE_TELEMETRY": "1",

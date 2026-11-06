@@ -63,14 +63,13 @@ reown /hostclaude
 
 # --- workspace dirs ----------------------------------------------------------
 # .adlc-artifacts/claude is the mount TARGET for the above. The data dirs are
-# bind SOURCES for compose.yaml sidecars (mssql uses a named Docker volume
-# instead, so it is not listed); infra-up.sh re-creates them in-container on
+# bind SOURCES for compose.yaml sidecars (mssql and mongo use named Docker volumes
+# instead, so they are not listed); infra-up.sh re-creates them in-container on
 # every start, so keep the list in sync with both. frontend/cache is the shared
 # pnpm store + yarn cache for the frontend sub-apps, which run natively in the
 # devcontainer (see .devcontainer/local-stack-frontend.sh).
 for d in \
   .adlc-artifacts/claude \
-  .adlc-artifacts/mongo_data \
   .adlc-artifacts/azurite_data \
   .adlc-artifacts/n8n_data \
   .adlc-artifacts/frontend/cache

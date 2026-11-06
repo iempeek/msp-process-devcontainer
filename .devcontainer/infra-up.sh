@@ -78,7 +78,7 @@ ARTIFACTS="$WS_ROOT/.adlc-artifacts"
 # the natively-run Vite apps (see .devcontainer/local-stack-frontend.sh).
 # The old per-app frontend/nm_<slug> dirs backed the retired frontend
 # container's node_modules bind mounts and are no longer created or used.
-if ! mkdir -p "$ARTIFACTS/mongo_data" "$ARTIFACTS/azurite_data" \
+if ! mkdir -p "$ARTIFACTS/azurite_data" \
     "$ARTIFACTS/n8n_data" "$ARTIFACTS/frontend/cache"; then
   echo "[ERROR] infra-up: $ARTIFACTS is not writable. It was likely auto-created" >&2
   echo "        root-owned by the docker daemon (missing mount target). Fix on the" >&2
