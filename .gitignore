@@ -20,3 +20,6 @@
 .adlc-artifacts/
 
 .claude
+
+# IDE settings
+.idea/
