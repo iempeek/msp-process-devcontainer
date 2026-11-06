@@ -28,7 +28,7 @@
   // Options/README per feature: https://github.com/devcontainers/features/tree/main/src/<name>
   "features": {
     // https://github.com/devcontainers/features/tree/main/src/node
-    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/node:1": { "version": "24.22.1" },
 
     // https://github.com/devcontainers/features/tree/main/src/azure-cli
     // The backend reaches Key Vault through RBAC (DefaultAzureCredential ->
@@ -64,7 +64,8 @@
       // Extension IDs: search on https://marketplace.visualstudio.com,
       // ID is on the extension page under "Unique Identifier"
       "extensions": [
-        "ms-dotnettools.csharp"
+        "ms-dotnettools.csharp",
+        "anthropic.claude-code"
       ],
       "settings": {
         // NO OmniSharp. `dotnet.server.useOmnisharp` used to be forced on here,
@@ -212,6 +213,10 @@
     // (Never set ASPNETCORE_ENVIRONMENT=Local - that DISABLES the local file.)
     "ASPNETCORE_ENVIRONMENT": "Development",
     "MSPPROCESS_USE_LOCAL_SETTINGS": "true",
+
+    // Grpc.Tools' linux_arm64 protoc segfaults on the @response file MSBuild
+    // passes it; this wrapper expands it first. See the script header.
+    "Protobuf_ProtocFullPath": "${containerWorkspaceFolder}/.devcontainer/protoc-rsp-wrapper.sh",
 
     // pnpm store location (the named volume in "mounts").
     "FE_PNPM_STORE_DIR": "/pnpm-store",
