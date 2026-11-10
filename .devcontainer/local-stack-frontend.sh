@@ -45,10 +45,13 @@ fe_available() { [ -d "$FE_ROOT" ]; }
 # global install (and no root) is needed. Caches are shared across apps and
 # reused from the previous compose-based setup.
 fe_prepare_env() {
-  mkdir -p "$FE_BIN_DIR" "$FE_CACHE/corepack" "$FE_CACHE/pnpm-store" "$FE_CACHE/yarn"
+  # FE_PNPM_STORE_DIR (devcontainer.json) points the store at a named volume:
+  # under the workspace bind mount pnpm installs fail with ESTALE on macOS.
+  local pnpm_store="${FE_PNPM_STORE_DIR:-$FE_CACHE/pnpm-store}"
+  mkdir -p "$FE_BIN_DIR" "$FE_CACHE/corepack" "$pnpm_store" "$FE_CACHE/yarn"
   export COREPACK_HOME="$FE_CACHE/corepack"
   export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-  export npm_config_store_dir="$FE_CACHE/pnpm-store"
+  export npm_config_store_dir="$pnpm_store"
   export YARN_CACHE_FOLDER="$FE_CACHE/yarn"
   # Some sub-apps hardcode Vite's `open: true`; there is no browser to open
   # here (the agent's browser is the MCP one), and BROWSER=none is the standard

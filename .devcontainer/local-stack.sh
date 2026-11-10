@@ -463,9 +463,9 @@ record_started() { # <id> <pid> <url>
   STARTED_IDS+=("$1")
 }
 
-# The workspace .env holds the dev secrets the backend hosts need as ENV VARS
-# (MSPPROCESS_AZURE_*_KV_CLIENTSECRET, seeded by link-local-settings.sh; SONAR_*
-# appended by sonarqube-bootstrap.sh). It used to be injected by docker at
+# The workspace .env holds optional dev secrets the backend hosts need as ENV
+# VARS (e.g. SONAR_* appended by sonarqube-bootstrap.sh; Key Vault itself is
+# reached via `az login`, not env-var secrets). It used to be injected by docker at
 # container-creation time (devcontainer.json runArgs --env-file), which forced
 # the file to exist on the HOST before anything ran - a write that Windows hosts
 # refuse. It is now loaded here instead, per host process, exactly like the Vite

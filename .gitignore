@@ -8,8 +8,8 @@
 /MSPProcess/
 /mspprocess-ui/
 
-# Dev secrets. Created and seeded IN the container by link-local-settings.sh on
-# every start, and sourced by local-stack.sh into the backend hosts it launches.
+# Optional dev secrets (e.g. SONAR_* from sonarqube-bootstrap.sh). Created IN the
+# container, and sourced by local-stack.sh into the backend hosts it launches.
 # Nothing on the host creates or reads it (that used to be host-bootstrap.sh, for
 # runArgs --env-file - both are gone; the host write is refused on Windows).
 .env
@@ -20,3 +20,6 @@
 .adlc-artifacts/
 
 .claude
+
+# IDE settings
+.idea/

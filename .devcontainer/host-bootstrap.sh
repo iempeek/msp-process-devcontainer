@@ -51,10 +51,9 @@ reown() {
 # on a missing file. Creating it from here failed on Windows hosts (the write goes
 # through the Docker Desktop bind-mount translation layer as root and is refused),
 # and the --env-file dependency is gone, so nothing needs the file to exist before
-# the container is created. .env is now purely an IN-container file: created and
-# seeded by link-local-settings.sh on every start, extended by
-# sonarqube-bootstrap.sh, and sourced by local-stack.sh when it launches the
-# backend hosts.
+# the container is created. .env is now purely an IN-container, optional file:
+# written by sonarqube-bootstrap.sh and sourced by local-stack.sh when it
+# launches the backend hosts.
 
 # --- host ~/.claude: bind SOURCE for the mounts entry ------------------------
 # Docker auto-creates the source if it is missing, so by the time this runs the
@@ -64,14 +63,13 @@ reown /hostclaude
 
 # --- workspace dirs ----------------------------------------------------------
 # .adlc-artifacts/claude is the mount TARGET for the above. The data dirs are
-# bind SOURCES for compose.yaml sidecars (mssql uses a named Docker volume
-# instead, so it is not listed); infra-up.sh re-creates them in-container on
+# bind SOURCES for compose.yaml sidecars (mssql and mongo use named Docker volumes
+# instead, so they are not listed); infra-up.sh re-creates them in-container on
 # every start, so keep the list in sync with both. frontend/cache is the shared
 # pnpm store + yarn cache for the frontend sub-apps, which run natively in the
 # devcontainer (see .devcontainer/local-stack-frontend.sh).
 for d in \
   .adlc-artifacts/claude \
-  .adlc-artifacts/mongo_data \
   .adlc-artifacts/azurite_data \
   .adlc-artifacts/n8n_data \
   .adlc-artifacts/frontend/cache

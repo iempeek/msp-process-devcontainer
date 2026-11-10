@@ -41,11 +41,23 @@ host docker daemon - shared network, data dirs, soketi relay (`infra-up.sh` +
 up on demand, and only the selected ones, via `local-stack.sh --run` below
 (`infra-up.sh --with-sidecars` starts the whole set at once).
 
-Fill in any `[REQUIRED]` placeholders that `link-local-settings.sh` seeds into
-`.env` before using the integrations that need them. `.env` lives at the
-workspace root and is only ever created/read from INSIDE the container -
-`local-stack.sh` sources it into each backend host it launches, so a change
-takes effect on the next `--run`, with no container rebuild.
+The backend reads Azure Key Vault (`mp-dev-us-kv`) through RBAC, using your own
+Azure sign-in - there are no Key Vault client secrets to fill in. Once per
+machine (the login survives rebuilds in the `mspprocess-azure` volume), sign in
+to the Alert Manager tenant and make it the default:
+
+```bash
+az login --use-device-code --tenant 355ba7a4-a055-4eaa-a6c4-645eaa713eff --allow-no-subscriptions
+```
+
+Your account needs the **Key Vault Secrets User** role (or Officer) on
+`mp-dev-us-kv` - ask DevOps. A token from your home tenant is rejected with
+`AKV10032: Invalid issuer`.
+
+An optional `.env` at the workspace root holds extra env-var secrets (e.g.
+`SONAR_*` from `sonarqube-bootstrap.sh`). It is only ever created/read from
+INSIDE the container - `local-stack.sh` sources it into each backend host it
+launches, so a change takes effect on the next `--run`, with no rebuild.
 
 ## Running the stack
 

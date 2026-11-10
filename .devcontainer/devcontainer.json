@@ -28,7 +28,14 @@
   // Options/README per feature: https://github.com/devcontainers/features/tree/main/src/<name>
   "features": {
     // https://github.com/devcontainers/features/tree/main/src/node
-    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/node:1": { "version": "24.22.1" },
+
+    // https://github.com/devcontainers/features/tree/main/src/azure-cli
+    // The backend reaches Key Vault through RBAC (DefaultAzureCredential ->
+    // `az login`), not client secrets. Sign in once with
+    // `az login --use-device-code --tenant <Alert Manager tenant id>`; the
+    // login lives in the mspprocess-azure volume (see "mounts").
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
 
     // https://github.com/devcontainers/features/tree/main/src/git
     "ghcr.io/devcontainers/features/git:1": {},
@@ -57,7 +64,8 @@
       // Extension IDs: search on https://marketplace.visualstudio.com,
       // ID is on the extension page under "Unique Identifier"
       "extensions": [
-        "ms-dotnettools.csharp"
+        "ms-dotnettools.csharp",
+        "anthropic.claude-code"
       ],
       "settings": {
         // NO OmniSharp. `dotnet.server.useOmnisharp` used to be forced on here,
@@ -65,6 +73,10 @@
         // this solution's net10.0 projects - the SDK bump alone would have left
         // IntelliSense and in-editor builds broken. Unset, the C# extension uses
         // its own Roslyn language server, which tracks the installed SDK.
+
+        // Editor TypeScript = the main app's (5.x), not VS Code's bundled TS 6,
+        // which flags every tsconfig `baseUrl` as deprecated.
+        "typescript.tsdk": "mspprocess-ui/Web/AlertManager.Web/node_modules/typescript/lib"
       }
     }
   },
@@ -132,7 +144,16 @@
   // construction). Caveat: a Windows shell that sets BOTH (Git Bash, MSYS)
   // would concatenate two paths - run `devcontainer up` from cmd/PowerShell.
   "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=${containerWorkspaceFolder}/.adlc-artifacts/claude,type=bind,consistency=cached"
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.claude,target=${containerWorkspaceFolder}/.adlc-artifacts/claude,type=bind,consistency=cached",
+
+    // Azure CLI login, kept across container rebuilds.
+    "source=mspprocess-azure,target=/root/.azure,type=volume",
+
+    // pnpm content-addressable store on a NAMED volume, not under the workspace
+    // bind mount: on macOS (virtiofs) pnpm's parallel copies of one store file
+    // into many node_modules paths fail with ESTALE ("Unknown system error
+    // -116"). See FE_PNPM_STORE_DIR in containerEnv / local-stack-frontend.sh.
+    "source=mspprocess-pnpm-store,target=/pnpm-store,type=volume"
 
     // NOTE: there is no separate mount for the frontend checkout any more. This
     // devcontainer is opened on the PARENT folder that holds both checkouts, so
@@ -196,6 +217,13 @@
     // (Never set ASPNETCORE_ENVIRONMENT=Local - that DISABLES the local file.)
     "ASPNETCORE_ENVIRONMENT": "Development",
     "MSPPROCESS_USE_LOCAL_SETTINGS": "true",
+
+    // Grpc.Tools' linux_arm64 protoc segfaults on the @response file MSBuild
+    // passes it; this wrapper expands it first. See the script header.
+    "Protobuf_ProtocFullPath": "${containerWorkspaceFolder}/.devcontainer/protoc-rsp-wrapper.sh",
+
+    // pnpm store location (the named volume in "mounts").
+    "FE_PNPM_STORE_DIR": "/pnpm-store",
 
     // Claude Code telemetry opt-out
     "DISABLE_TELEMETRY": "1",
